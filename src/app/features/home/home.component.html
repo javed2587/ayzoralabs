@@ -1,0 +1,195 @@
+<!-- ===== HERO SECTION ===== -->
+<section class="hero">
+  <div class="hero-bg-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+  </div>
+
+  <div class="container hero-container">
+
+    <!-- Left Content -->
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        Pakistan's #1 Online Learning Platform for Kids
+      </div>
+
+      <h1 class="hero-title">
+        Unlock Your Child's
+        <span class="title-highlight">Coding Potential</span>
+        with Expert Mentors
+      </h1>
+
+      <p class="hero-subtitle">
+        Live classes, AI tools, game development, and more — designed
+        specifically for young learners aged 7–17. Join 12,000+ students
+        already learning with Ayzatech.
+      </p>
+
+      <div class="hero-actions">
+        <a routerLink="/register" class="btn-primary-hero">
+          Start Free Trial
+          <span class="btn-arrow">→</span>
+        </a>
+        <a routerLink="/courses" class="btn-secondary-hero">
+          Explore Courses
+        </a>
+      </div>
+
+      <div class="hero-trust">
+        <div class="trust-avatars">
+          <div class="avatar av1">A</div>
+          <div class="avatar av2">S</div>
+          <div class="avatar av3">M</div>
+          <div class="avatar av4">R</div>
+        </div>
+        <p class="trust-text">
+          <strong>4.9 ★</strong> rated by 2,000+ happy parents
+        </p>
+      </div>
+    </div>
+
+    <!-- Right Illustration -->
+    <div class="hero-visual">
+      <div class="visual-card main-card">
+        <div class="card-header-strip"></div>
+        <div class="card-body">
+          <div class="code-line"><span class="c-keyword">def</span> <span class="c-fn">learn_coding</span>():</div>
+          <div class="code-line indent"><span class="c-string">"Ayzatech"</span></div>
+          <div class="code-line indent"><span class="c-keyword">for</span> skill <span class="c-keyword">in</span> skills:</div>
+          <div class="code-line indent2"><span class="c-fn">master</span>(skill)</div>
+          <div class="code-line indent"><span class="c-keyword">return</span> <span class="c-string">"Future Ready 🚀"</span></div>
+          <div class="code-cursor"></div>
+        </div>
+      </div>
+
+      <div class="float-badge badge-students">
+        <span class="badge-icon">👨‍🎓</span>
+        <div>
+          <div class="badge-num">12,000+</div>
+          <div class="badge-lbl">Students</div>
+        </div>
+      </div>
+
+      <div class="float-badge badge-live">
+        <span class="live-dot"></span>
+        Live Class Now
+      </div>
+
+      <div class="float-badge badge-cert">
+        🏆 Certificate Earned!
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== STATS SECTION ===== -->
+<section class="stats-section">
+  <div class="container">
+    <div class="stats-grid">
+      @for (stat of stats; track stat.label) {
+        <div class="stat-item">
+          <div class="stat-value">{{ stat.value }}</div>
+          <div class="stat-label">{{ stat.label }}</div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURES SECTION ===== -->
+<section class="features-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Why Students Love Ayzatech</h2>
+      <p class="section-sub">Everything your child needs to become a future-ready digital creator</p>
+    </div>
+    <div class="features-grid">
+      @for (feature of features; track feature.title) {
+        <div class="feature-card">
+          <div class="feature-icon">{{ feature.icon }}</div>
+          <h3 class="feature-title">{{ feature.title }}</h3>
+          <p class="feature-desc">{{ feature.desc }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ===== COURSES SECTION ===== -->
+<section class="courses-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Popular Courses</h2>
+      <p class="section-sub">Explore our most loved programs for young learners</p>
+    </div>
+    <div class="courses-grid">
+      @for (course of courses; track course.title) {
+        <div class="course-card {{ course.color }}">
+          <div class="course-icon">{{ course.icon }}</div>
+          <h3 class="course-title">{{ course.title }}</h3>
+          <div class="course-meta">
+            <span class="meta-tag">{{ course.age }}</span>
+            <span class="meta-tag">{{ course.sessions }}</span>
+          </div>
+          <a routerLink="/courses" class="course-btn">Enroll Now →</a>
+        </div>
+      }
+    </div>
+    <div class="courses-cta">
+      <a routerLink="/courses" class="btn-primary-hero">View All Courses →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA BANNER ===== -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-box">
+      <div class="cta-shapes">
+        <div class="cta-shape-1"></div>
+        <div class="cta-shape-2"></div>
+      </div>
+      <h2 class="cta-title">Ready to Start Your Coding Journey?</h2>
+      <p class="cta-sub">Join thousands of young learners building the future with code, AI, and creativity.</p>
+      <div class="cta-actions">
+        <a routerLink="/register" class="btn-cta-white">Get Started Free</a>
+        <a routerLink="/contact"  class="btn-cta-outline">Talk to an Advisor</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span class="logo-icon">A</span>
+          <span class="logo-text">Ayza<strong>tech</strong></span>
+        </div>
+        <p class="footer-tagline">Empowering young minds with technology, creativity, and code.</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>Platform</h4>
+          <a routerLink="/courses">Courses</a>
+          <a routerLink="/student">Dashboard</a>
+          <a routerLink="/about">About Us</a>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <a routerLink="/contact">Contact</a>
+          <a routerLink="/login">Login</a>
+          <a routerLink="/register">Register</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2024 Ayzatech. All rights reserved. Built with ❤️ in Pakistan.</p>
+    </div>
+  </div>
+</footer>
