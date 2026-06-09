@@ -17,7 +17,7 @@ export const routes: Routes = [
   {
     path: 'courses',
     loadComponent: () =>
-      import('./features/courses/course-list/course-list').then(m => m.CourseList)
+      import('./features/courses/courses.component').then(m => m.CoursesComponent)
   },
   {
     path: 'student',
