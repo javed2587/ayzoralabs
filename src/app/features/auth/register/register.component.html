@@ -1,0 +1,255 @@
+<div class="auth-wrapper">
+
+  <!-- Left Panel -->
+  <div class="auth-left">
+    <div class="auth-left-content">
+      <a routerLink="/" class="auth-logo">
+        <span class="logo-icon">A</span>
+        <span class="logo-text">Ayza<strong>tech</strong></span>
+      </a>
+      <h2 class="auth-left-title">Start your learning journey today</h2>
+      <p class="auth-left-sub">
+        Join 12,000+ students already learning coding, AI, and game development with Ayzatech.
+      </p>
+      <div class="auth-features">
+        <div class="auth-feature">
+          <span class="af-icon">🆓</span>
+          <span>Free trial — no credit card needed</span>
+        </div>
+        <div class="auth-feature">
+          <span class="af-icon">🎓</span>
+          <span>Access to all beginner courses instantly</span>
+        </div>
+        <div class="auth-feature">
+          <span class="af-icon">👨‍🏫</span>
+          <span>Matched with an expert mentor in 24 hours</span>
+        </div>
+        <div class="auth-feature">
+          <span class="af-icon">📜</span>
+          <span>Earn certificates on completion</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="auth-right">
+    <div class="auth-card">
+
+      <!-- Step Indicator -->
+      <div class="step-indicator">
+        <div class="step" [class.step-active]="currentStep() >= 1" [class.step-done]="currentStep() > 1">
+          <span class="step-num">
+            @if (currentStep() > 1) { ✓ } @else { 1 }
+          </span>
+          <span class="step-label">Your Info</span>
+        </div>
+        <div class="step-line" [class.step-line-done]="currentStep() > 1"></div>
+        <div class="step" [class.step-active]="currentStep() >= 2">
+          <span class="step-num">2</span>
+          <span class="step-label">Security</span>
+        </div>
+      </div>
+
+      <div class="auth-card-header">
+        <h1 class="auth-title">
+          @if (currentStep() === 1) { Create Your Account }
+          @else { Set Your Password }
+        </h1>
+        <p class="auth-subtitle">
+          @if (currentStep() === 1) { Step 1 of 2 — Tell us about yourself }
+          @else { Step 2 of 2 — Secure your account }
+        </p>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="alert-error">
+          <span>⚠️</span> {{ errorMessage() }}
+        </div>
+      }
+
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate>
+
+        <!-- ===== STEP 1 ===== -->
+        @if (currentStep() === 1) {
+
+          <!-- Full Name -->
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <div class="input-wrap">
+              <span class="input-icon">👤</span>
+              <input
+                type="text"
+                formControlName="fullName"
+                class="form-input"
+                [class.input-error]="fullName?.invalid && fullName?.touched"
+                placeholder="Muhammad Javed"
+                autocomplete="name"
+              />
+            </div>
+            @if (fullName?.invalid && fullName?.touched) {
+              <div class="error-msg">
+                @if (fullName?.errors?.['required'])   { Full name is required. }
+                @if (fullName?.errors?.['minlength'])  { Name must be at least 3 characters. }
+              </div>
+            }
+          </div>
+
+          <!-- Email -->
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <div class="input-wrap">
+              <span class="input-icon">✉️</span>
+              <input
+                type="email"
+                formControlName="email"
+                class="form-input"
+                [class.input-error]="email?.invalid && email?.touched"
+                placeholder="you@example.com"
+                autocomplete="email"
+              />
+            </div>
+            @if (email?.invalid && email?.touched) {
+              <div class="error-msg">
+                @if (email?.errors?.['required']) { Email is required. }
+                @if (email?.errors?.['email'])    { Please enter a valid email address. }
+              </div>
+            }
+          </div>
+
+          <!-- Role -->
+          <div class="form-group">
+            <label class="form-label">I am registering as</label>
+            <div class="role-group">
+              @for (r of roles; track r) {
+                <label class="role-option" [class.role-selected]="role?.value === r">
+                  <input type="radio" formControlName="role" [value]="r" />
+                  <span class="role-icon">
+                    @if (r === 'Student') { 🎓 }
+                    @if (r === 'Parent')  { 👨‍👩‍👧 }
+                    @if (r === 'Teacher') { 👨‍🏫 }
+                  </span>
+                  <span>{{ r }}</span>
+                </label>
+              }
+            </div>
+          </div>
+
+          <button type="button" class="btn-submit" (click)="goToStep2()">
+            Continue → Set Password
+          </button>
+        }
+
+        <!-- ===== STEP 2 ===== -->
+        @if (currentStep() === 2) {
+
+          <!-- Phone -->
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <div class="input-wrap">
+              <span class="input-icon">📱</span>
+              <input
+                type="tel"
+                formControlName="phone"
+                class="form-input"
+                [class.input-error]="phone?.invalid && phone?.touched"
+                placeholder="03001234567"
+                autocomplete="tel"
+              />
+            </div>
+            @if (phone?.invalid && phone?.touched) {
+              <div class="error-msg">
+                @if (phone?.errors?.['required']) { Phone number is required. }
+                @if (phone?.errors?.['pattern'])  { Enter a valid 10-11 digit phone number. }
+              </div>
+            }
+          </div>
+
+          <!-- Password -->
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="input-wrap">
+              <span class="input-icon">🔒</span>
+              <input
+                [type]="showPassword() ? 'text' : 'password'"
+                formControlName="password"
+                class="form-input"
+                [class.input-error]="password?.invalid && password?.touched"
+                placeholder="Minimum 6 characters"
+                autocomplete="new-password"
+              />
+              <button type="button" class="toggle-pass" (click)="togglePassword()">
+                {{ showPassword() ? '🙈' : '👁️' }}
+              </button>
+            </div>
+            @if (password?.invalid && password?.touched) {
+              <div class="error-msg">
+                @if (password?.errors?.['required'])  { Password is required. }
+                @if (password?.errors?.['minlength']) { Password must be at least 6 characters. }
+              </div>
+            }
+          </div>
+
+          <!-- Confirm Password -->
+          <div class="form-group">
+            <label class="form-label">Confirm Password</label>
+            <div class="input-wrap">
+              <span class="input-icon">🔐</span>
+              <input
+                [type]="showConfirmPassword() ? 'text' : 'password'"
+                formControlName="confirmPassword"
+                class="form-input"
+                [class.input-error]="(confirmPassword?.touched && registerForm.errors?.['passwordMismatch'])"
+                placeholder="Re-enter your password"
+                autocomplete="new-password"
+              />
+              <button type="button" class="toggle-pass" (click)="toggleConfirmPassword()">
+                {{ showConfirmPassword() ? '🙈' : '👁️' }}
+              </button>
+            </div>
+            @if (confirmPassword?.touched && registerForm.errors?.['passwordMismatch']) {
+              <div class="error-msg">Passwords do not match.</div>
+            }
+          </div>
+
+          <!-- Terms -->
+          <div class="form-check">
+            <input type="checkbox" formControlName="terms" id="terms" class="check-input" />
+            <label for="terms" class="check-label">
+              I agree to Ayzatech's
+              <a routerLink="/terms" class="switch-link">Terms of Service</a> and
+              <a routerLink="/privacy" class="switch-link">Privacy Policy</a>
+            </label>
+          </div>
+          @if (terms?.invalid && terms?.touched) {
+            <div class="error-msg" style="margin-top: -12px; margin-bottom: 12px;">
+              You must accept the terms to continue.
+            </div>
+          }
+
+          <!-- Buttons -->
+          <div class="btn-row">
+            <button type="button" class="btn-back" (click)="goToStep1()">
+              ← Back
+            </button>
+            <button type="submit" class="btn-submit btn-submit-half" [disabled]="isLoading()">
+              @if (isLoading()) {
+                <span class="spinner"></span> Creating...
+              } @else {
+                Create Account 🎉
+              }
+            </button>
+          </div>
+        }
+
+      </form>
+
+      <p class="auth-switch">
+        Already have an account?
+        <a routerLink="/login" class="switch-link">Login here →</a>
+      </p>
+
+    </div>
+  </div>
+
+</div>
