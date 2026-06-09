@@ -1,0 +1,138 @@
+<div class="auth-wrapper">
+
+  <!-- Left Panel — Branding -->
+  <div class="auth-left">
+    <div class="auth-left-content">
+      <a routerLink="/" class="auth-logo">
+        <span class="logo-icon">A</span>
+        <span class="logo-text">Ayza<strong>tech</strong></span>
+      </a>
+      <h2 class="auth-left-title">Welcome back to your learning journey</h2>
+      <p class="auth-left-sub">
+        Thousands of students are learning right now.
+        Login to continue your progress.
+      </p>
+      <div class="auth-features">
+        <div class="auth-feature">
+          <span class="af-icon">🎯</span>
+          <span>Pick up exactly where you left off</span>
+        </div>
+        <div class="auth-feature">
+          <span class="af-icon">📊</span>
+          <span>Track your progress and attendance</span>
+        </div>
+        <div class="auth-feature">
+          <span class="af-icon">🏆</span>
+          <span>View your earned certificates</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel — Form -->
+  <div class="auth-right">
+    <div class="auth-card">
+
+      <div class="auth-card-header">
+        <h1 class="auth-title">Login to Ayzatech</h1>
+        <p class="auth-subtitle">Enter your credentials to access your dashboard</p>
+      </div>
+
+      <!-- Error Message -->
+      @if (errorMessage()) {
+        <div class="alert-error">
+          <span>⚠️</span> {{ errorMessage() }}
+        </div>
+      }
+
+      <!-- Login Form -->
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+
+        <!-- Email Field -->
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <div class="input-wrap">
+            <span class="input-icon">✉️</span>
+            <input
+              type="email"
+              formControlName="email"
+              class="form-input"
+              [class.input-error]="email?.invalid && email?.touched"
+              placeholder="you@example.com"
+              autocomplete="email"
+            />
+          </div>
+          @if (email?.invalid && email?.touched) {
+            <div class="error-msg">
+              @if (email?.errors?.['required']) { Email is required. }
+              @if (email?.errors?.['email'])    { Please enter a valid email address. }
+            </div>
+          }
+        </div>
+
+        <!-- Password Field -->
+        <div class="form-group">
+          <div class="label-row">
+            <label class="form-label">Password</label>
+            <a routerLink="/forgot-password" class="forgot-link">Forgot password?</a>
+          </div>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              class="form-input"
+              [class.input-error]="password?.invalid && password?.touched"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+            />
+            <button type="button" class="toggle-pass" (click)="togglePassword()">
+              {{ showPassword() ? '🙈' : '👁️' }}
+            </button>
+          </div>
+          @if (password?.invalid && password?.touched) {
+            <div class="error-msg">
+              @if (password?.errors?.['required'])  { Password is required. }
+              @if (password?.errors?.['minlength']) { Password must be at least 6 characters. }
+            </div>
+          }
+        </div>
+
+        <!-- Remember Me -->
+        <div class="form-check">
+          <input type="checkbox" formControlName="remember" id="remember" class="check-input" />
+          <label for="remember" class="check-label">Remember me for 30 days</label>
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          class="btn-submit"
+          [disabled]="isLoading()">
+          @if (isLoading()) {
+            <span class="spinner"></span> Logging in...
+          } @else {
+            Login to Dashboard →
+          }
+        </button>
+
+      </form>
+
+      <!-- Divider -->
+      <div class="divider"><span>or</span></div>
+
+      <!-- Demo credentials hint -->
+      <div class="demo-hint">
+        <strong>Demo login:</strong> admin&#64;ayzatech.com / 123456
+      </div>
+
+      <!-- Register Link -->
+      <p class="auth-switch">
+        Don't have an account?
+        <a routerLink="/register" class="switch-link">Create one free →</a>
+      </p>
+
+    </div>
+  </div>
+
+</div>

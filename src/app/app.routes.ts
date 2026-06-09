@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { Login } from './features/auth/login/login';
 
 export const routes: Routes = [
      {
@@ -9,11 +8,11 @@ export const routes: Routes = [
   },
   { 
    path: 'login',
-    loadComponent: () => import('./features/auth/login/login').then(m => m.Login)
+    loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent)
   },
   {
     path: 'register',
-    loadComponent: () => import('./features/auth/register/register').then(m => m.Register)
+    loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent)
   },
   {
     path: 'courses',
