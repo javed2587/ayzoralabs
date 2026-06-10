@@ -1,0 +1,140 @@
+<!-- ===== PAGE HEADER ===== -->
+<section class="courses-header">
+  <div class="container">
+    <div class="header-content">
+      <div class="header-text">
+        <div class="header-badge">📚 All Courses</div>
+        <h1 class="header-title">Find Your Perfect Course</h1>
+        <p class="header-sub">
+          Expert-led live classes for students aged 7–17.
+          Learn coding, AI, game development, and more.
+        </p>
+      </div>
+      <!-- Search Bar -->
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search courses, teachers..."
+          (input)="onSearch($event)"
+        />
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FILTER TABS ===== -->
+<section class="filter-section">
+  <div class="container">
+    <div class="filter-bar">
+      <div class="filter-tabs">
+        @for (cat of categories; track cat) {
+          <button
+            class="filter-tab"
+            [class.tab-active]="activeCategory() === cat"
+            (click)="setCategory(cat)">
+            {{ cat }}
+          </button>
+        }
+      </div>
+      <div class="results-count">
+        {{ filteredCourses().length }} course{{ filteredCourses().length !== 1 ? 's' : '' }} found
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== COURSES GRID ===== -->
+<section class="courses-section">
+  <div class="container">
+
+    <!-- No results message -->
+    @if (filteredCourses().length === 0) {
+      <div class="no-results">
+        <div class="no-results-icon">🔍</div>
+        <h3>No courses found</h3>
+        <p>Try a different search term or category filter.</p>
+        <button class="btn-reset" (click)="setCategory('All')">
+          Show All Courses
+        </button>
+      </div>
+    }
+
+    <!-- Courses Grid -->
+    <div class="courses-grid">
+      @for (course of filteredCourses(); track course.id) {
+        <div class="course-card">
+
+          <!-- Card Top — colored banner -->
+          <div class="card-top {{ course.color }}">
+            <span class="card-icon">{{ course.icon }}</span>
+            @if (course.badge) {
+              <span class="card-badge">{{ course.badge }}</span>
+            }
+            <span class="card-level">{{ course.level }}</span>
+          </div>
+
+          <!-- Card Body -->
+          <div class="card-body">
+            <h3 class="card-title">{{ course.title }}</h3>
+            <p class="card-desc">{{ course.description }}</p>
+
+            <!-- Teacher Info -->
+            <div class="teacher-row">
+              <div class="teacher-avatar">{{ course.teacherAvatar }}</div>
+              <div class="teacher-info">
+                <div class="teacher-name">{{ course.teacherName }}</div>
+                <div class="teacher-label">Instructor</div>
+              </div>
+            </div>
+
+            <!-- Course Meta -->
+            <div class="meta-row">
+              <div class="meta-item">
+                <span class="meta-icon">🕐</span>
+                <span>{{ course.duration }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-icon">📅</span>
+                <span>{{ course.sessions }} sessions</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-icon">👥</span>
+                <span>{{ course.students.toLocaleString() }}</span>
+              </div>
+            </div>
+
+            <!-- Rating -->
+            <div class="rating-row">
+              <span class="stars">{{ getStars(course.rating) }}</span>
+              <span class="rating-num">{{ course.rating }}</span>
+              <span class="rating-total">({{ course.students.toLocaleString() }} students)</span>
+            </div>
+          </div>
+
+          <!-- Card Footer -->
+          <div class="card-footer">
+            <div class="price">{{ formatPrice(course.price) }}</div>
+            <a [routerLink]="['/courses', course.id]" class="btn-enroll">
+              Enroll Now →
+            </a>
+          </div>
+
+        </div>
+      }
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== BOTTOM CTA ===== -->
+<section class="bottom-cta">
+  <div class="container">
+    <div class="cta-inner">
+      <h2>Can't find what you're looking for?</h2>
+      <p>Talk to our team and we'll match you with the perfect course for your child.</p>
+      <a routerLink="/contact" class="btn-cta">Talk to an Advisor →</a>
+    </div>
+  </div>
+</section>
