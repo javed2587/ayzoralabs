@@ -1,6 +1,5 @@
 import { Component, computed, signal } from '@angular/core';
 import { Course } from '../../shared/models/course';
-import { Router } from 'express';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
