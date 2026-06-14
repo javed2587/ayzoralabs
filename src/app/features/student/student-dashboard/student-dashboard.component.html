@@ -1,0 +1,431 @@
+<div class="dashboard-wrapper">
+
+  <!-- ══ MOBILE HEADER ════════════════════════════════════════════════════ -->
+  <header class="mobile-header">
+    <button class="hamburger-btn" (click)="toggleSidebar()">☰</button>
+    <div class="mobile-logo">
+      <span class="logo-icon">A</span>
+      <span>Ayza<strong>tech</strong></span>
+    </div>
+    <div class="mobile-notif">
+      @if (unreadCount() > 0) {
+        <span class="notif-badge">{{ unreadCount() }}</span>
+      }
+      🔔
+    </div>
+  </header>
+
+  <!-- ══ SIDEBAR ══════════════════════════════════════════════════════════ -->
+  <aside class="sidebar" [class.sidebar-open]="sidebarOpen()">
+
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <a routerLink="/" class="logo-link">
+        <span class="logo-icon">A</span>
+        <span class="logo-text">Ayza<strong>tech</strong></span>
+      </a>
+    </div>
+
+    <!-- Student Profile Card -->
+    <div class="sidebar-profile">
+      <div class="profile-avatar">{{ student().avatar }}</div>
+      <div class="profile-info">
+        <div class="profile-name">{{ student().name }}</div>
+        <div class="profile-level">{{ student().level }} Learner</div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+      <button class="nav-item" [class.nav-active]="activeSection() === 'dashboard'"     (click)="setSection('dashboard')">
+        <span class="nav-icon">🏠</span> Dashboard
+      </button>
+      <button class="nav-item" [class.nav-active]="activeSection() === 'courses'"       (click)="setSection('courses')">
+        <span class="nav-icon">📚</span> My Courses
+        <span class="nav-count">{{ enrolledCourses().length }}</span>
+      </button>
+      <button class="nav-item" [class.nav-active]="activeSection() === 'attendance'"    (click)="setSection('attendance')">
+        <span class="nav-icon">✅</span> Attendance
+        <span class="nav-count">{{ attendancePercent() }}%</span>
+      </button>
+      <button class="nav-item" [class.nav-active]="activeSection() === 'assignments'"   (click)="setSection('assignments')">
+        <span class="nav-icon">📝</span> Assignments
+        @if (pendingAssignments() > 0) {
+          <span class="nav-badge">{{ pendingAssignments() }}</span>
+        }
+      </button>
+      <button class="nav-item" [class.nav-active]="activeSection() === 'notifications'" (click)="setSection('notifications')">
+        <span class="nav-icon">🔔</span> Notifications
+        @if (unreadCount() > 0) {
+          <span class="nav-badge">{{ unreadCount() }}</span>
+        }
+      </button>
+      <button class="nav-item" [class.nav-active]="activeSection() === 'profile'"       (click)="setSection('profile')">
+        <span class="nav-icon">👤</span> My Profile
+      </button>
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <a routerLink="/courses" class="sidebar-cta">+ Enroll New Course</a>
+      <a routerLink="/login"   class="logout-btn">🚪 Logout</a>
+    </div>
+
+  </aside>
+
+  <!-- Overlay for mobile -->
+  @if (sidebarOpen()) {
+    <div class="sidebar-overlay" (click)="toggleSidebar()"></div>
+  }
+
+  <!-- ══ MAIN CONTENT ══════════════════════════════════════════════════════ -->
+  <main class="dashboard-main">
+
+    <!-- ── DASHBOARD HOME ── -->
+    @if (activeSection() === 'dashboard') {
+
+      <!-- Welcome Banner -->
+      <div class="welcome-banner">
+        <div class="welcome-text">
+          <h1 class="welcome-title">Welcome back, {{ getFirstName() }}! 👋</h1>
+          <p class="welcome-sub">You have {{ pendingAssignments() }} pending assignments and {{ upcomingClasses().length }} upcoming classes this week.</p>
+        </div>
+        <div class="welcome-emoji">🎓</div>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="stats-row">
+        <div class="stat-card stat-purple">
+          <div class="stat-icon">📚</div>
+          <div class="stat-body">
+            <div class="stat-value">{{ enrolledCourses().length }}</div>
+            <div class="stat-label">Enrolled Courses</div>
+          </div>
+        </div>
+        <div class="stat-card stat-green">
+          <div class="stat-icon">✅</div>
+          <div class="stat-body">
+            <div class="stat-value">{{ attendancePercent() }}%</div>
+            <div class="stat-label">Attendance Rate</div>
+          </div>
+        </div>
+        <div class="stat-card stat-orange">
+          <div class="stat-icon">📝</div>
+          <div class="stat-body">
+            <div class="stat-value">{{ pendingAssignments() }}</div>
+            <div class="stat-label">Pending Tasks</div>
+          </div>
+        </div>
+        <div class="stat-card stat-blue">
+          <div class="stat-icon">🏆</div>
+          <div class="stat-body">
+            <div class="stat-value">{{ completedCourses() }}</div>
+            <div class="stat-label">Completed Courses</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two column layout -->
+      <div class="dashboard-grid">
+
+        <!-- Upcoming Classes -->
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <h2 class="dash-card-title">📅 Upcoming Classes</h2>
+            <button class="view-all-btn" (click)="setSection('courses')">View All</button>
+          </div>
+          <div class="classes-list">
+            @for (cls of upcomingClasses(); track cls.id) {
+              <div class="class-item">
+                <div class="class-icon-wrap {{ cls.color }}">{{ cls.icon }}</div>
+                <div class="class-info">
+                  <div class="class-title">{{ cls.course }}</div>
+                  <div class="class-meta">{{ cls.teacher }} · {{ cls.platform }}</div>
+                </div>
+                <div class="class-time">
+                  <div class="class-day">{{ cls.day }}</div>
+                  <div class="class-hour">{{ cls.time }}</div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Recent Notifications -->
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <h2 class="dash-card-title">🔔 Notifications
+              @if (unreadCount() > 0) {
+                <span class="header-badge">{{ unreadCount() }}</span>
+              }
+            </h2>
+            <button class="view-all-btn" (click)="setSection('notifications')">View All</button>
+          </div>
+          <div class="notif-list">
+            @for (notif of notifications().slice(0, 4); track notif.id) {
+              <div class="notif-item" [class.notif-unread]="!notif.read" (click)="markAsRead(notif.id)">
+                <span class="notif-type-icon">{{ notifIcon(notif.type) }}</span>
+                <div class="notif-body">
+                  <div class="notif-title">{{ notif.title }}</div>
+                  <div class="notif-msg">{{ notif.message }}</div>
+                  <div class="notif-time">{{ notif.time }}</div>
+                </div>
+                @if (!notif.read) {
+                  <span class="unread-dot"></span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- My Courses Progress -->
+        <div class="dash-card full-width">
+          <div class="dash-card-header">
+            <h2 class="dash-card-title">📚 My Courses Progress</h2>
+            <button class="view-all-btn" (click)="setSection('courses')">View All</button>
+          </div>
+          <div class="progress-list">
+            @for (course of enrolledCourses(); track course.id) {
+              <div class="progress-item">
+                <div class="progress-icon {{ course.color }}">{{ course.icon }}</div>
+                <div class="progress-info">
+                  <div class="progress-top">
+                    <span class="progress-title">{{ course.title }}</span>
+                    <span class="progress-pct">{{ course.progress }}%</span>
+                  </div>
+                  <div class="progress-sub">{{ course.teacher }} · {{ course.completedSessions }}/{{ course.totalSessions }} sessions</div>
+                  <div class="progress-bar-wrap">
+                    <div class="progress-bar" [style.width.%]="course.progress"
+                      [class.bar-complete]="course.status === 'completed'"></div>
+                  </div>
+                </div>
+                <span class="status-pill" [class.pill-active]="course.status === 'active'"
+                  [class.pill-done]="course.status === 'completed'">
+                  {{ course.status }}
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+
+      </div>
+    }
+
+    <!-- ── MY COURSES ── -->
+    @if (activeSection() === 'courses') {
+      <div class="section-header">
+        <h1 class="section-title">My Courses</h1>
+        <a routerLink="/courses" class="btn-primary">+ Enroll New Course</a>
+      </div>
+      <div class="courses-grid">
+        @for (course of enrolledCourses(); track course.id) {
+          <div class="course-card">
+            <div class="course-card-top {{ course.color }}">
+              <span class="course-card-icon">{{ course.icon }}</span>
+              <span class="status-pill"
+                [class.pill-active]="course.status === 'active'"
+                [class.pill-done]="course.status === 'completed'">
+                {{ course.status }}
+              </span>
+            </div>
+            <div class="course-card-body">
+              <h3 class="course-card-title">{{ course.title }}</h3>
+              <p class="course-card-teacher">👨‍🏫 {{ course.teacher }}</p>
+              <div class="course-progress-wrap">
+                <div class="progress-top">
+                  <span class="progress-label">Progress</span>
+                  <span class="progress-pct">{{ course.progress }}%</span>
+                </div>
+                <div class="progress-bar-wrap">
+                  <div class="progress-bar" [style.width.%]="course.progress"
+                    [class.bar-complete]="course.status === 'completed'"></div>
+                </div>
+              </div>
+              <div class="course-meta-row">
+                <span>📅 {{ course.completedSessions }}/{{ course.totalSessions }} sessions</span>
+                <span>⏭️ {{ course.nextClass }}</span>
+              </div>
+            </div>
+            @if (course.status === 'active') {
+              <div class="course-card-footer">
+                <button class="btn-join">Join Next Class →</button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ── ATTENDANCE ── -->
+    @if (activeSection() === 'attendance') {
+      <div class="section-header">
+        <h1 class="section-title">Attendance</h1>
+      </div>
+
+      <!-- Attendance Summary -->
+      <div class="attendance-summary">
+        <div class="att-stat att-green">
+          <div class="att-num">{{ totalPresent() }}</div>
+          <div class="att-lbl">Present</div>
+        </div>
+        <div class="att-stat att-red">
+          <div class="att-num">{{ absentCount() }}</div>
+          <div class="att-lbl">Absent</div>
+        </div>
+        <div class="att-stat att-yellow">
+          <div class="att-num">{{ lateCount() }}</div>
+          <div class="att-lbl">Late</div>
+        </div>
+        <div class="att-stat att-purple">
+          <div class="att-num">{{ attendancePercent() }}%</div>
+          <div class="att-lbl">Overall Rate</div>
+        </div>
+      </div>
+
+      <!-- Attendance Table -->
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <h2 class="dash-card-title">Attendance Records</h2>
+        </div>
+        <div class="att-table-wrap">
+          <table class="att-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Course</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (record of attendanceRecords(); track record.date) {
+                <tr>
+                  <td class="att-date">{{ record.date }}</td>
+                  <td class="att-course">{{ record.course }}</td>
+                  <td>
+                    <span class="att-status"
+                      [class.status-present]="record.status === 'present'"
+                      [class.status-absent]="record.status === 'absent'"
+                      [class.status-late]="record.status === 'late'">
+                      @if (record.status === 'present') { ✅ Present }
+                      @if (record.status === 'absent')  { ❌ Absent  }
+                      @if (record.status === 'late')    { ⚠️ Late    }
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    <!-- ── ASSIGNMENTS ── -->
+    @if (activeSection() === 'assignments') {
+      <div class="section-header">
+        <h1 class="section-title">Assignments</h1>
+        <span class="pending-badge">{{ pendingAssignments() }} pending</span>
+      </div>
+      <div class="assignments-list">
+        @for (task of assignments(); track task.id) {
+          <div class="assignment-card" [class.asgn-pending]="task.status === 'pending'">
+            <div class="asgn-left">
+              <div class="asgn-icon">
+                @if (task.status === 'pending')   { 📝 }
+                @if (task.status === 'submitted') { 📤 }
+                @if (task.status === 'graded')    { 🏆 }
+              </div>
+              <div class="asgn-info">
+                <div class="asgn-title">{{ task.title }}</div>
+                <div class="asgn-meta">{{ task.course }} · Due: {{ task.dueDate }}</div>
+              </div>
+            </div>
+            <div class="asgn-right">
+              @if (task.grade) {
+                <span class="asgn-grade">{{ task.grade }}</span>
+              }
+              <span class="asgn-status"
+                [class.status-pending]="task.status === 'pending'"
+                [class.status-submitted]="task.status === 'submitted'"
+                [class.status-graded]="task.status === 'graded'">
+                {{ task.status }}
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ── NOTIFICATIONS ── -->
+    @if (activeSection() === 'notifications') {
+      <div class="section-header">
+        <h1 class="section-title">Notifications
+          @if (unreadCount() > 0) {
+            <span class="header-badge">{{ unreadCount() }} new</span>
+          }
+        </h1>
+        @if (unreadCount() > 0) {
+          <button class="btn-outline" (click)="markAllRead()">Mark all read</button>
+        }
+      </div>
+      <div class="notif-full-list">
+        @for (notif of notifications(); track notif.id) {
+          <div class="notif-item-full" [class.notif-unread]="!notif.read" (click)="markAsRead(notif.id)">
+            <div class="notif-icon-wrap">{{ notifIcon(notif.type) }}</div>
+            <div class="notif-content">
+              <div class="notif-title-full">{{ notif.title }}</div>
+              <div class="notif-msg-full">{{ notif.message }}</div>
+              <div class="notif-time-full">{{ notif.time }}</div>
+            </div>
+            @if (!notif.read) {
+              <span class="unread-dot"></span>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ── PROFILE ── -->
+    @if (activeSection() === 'profile') {
+      <div class="section-header">
+        <h1 class="section-title">My Profile</h1>
+      </div>
+      <div class="profile-card">
+        <div class="profile-card-top">
+          <div class="profile-avatar-lg">{{ student().avatar }}</div>
+          <div class="profile-card-info">
+            <h2 class="profile-card-name">{{ student().name }}</h2>
+            <p class="profile-card-email">{{ student().email }}</p>
+            <span class="profile-level-badge">{{ student().level }} Learner</span>
+          </div>
+        </div>
+        <div class="profile-details">
+          <div class="detail-row">
+            <span class="detail-label">📧 Email</span>
+            <span class="detail-value">{{ student().email }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">📱 Phone</span>
+            <span class="detail-value">{{ student().phone }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">👨‍👩‍👧 Parent</span>
+            <span class="detail-value">{{ student().parentName }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">📅 Enrolled On</span>
+            <span class="detail-value">{{ student().enrolledOn }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">📚 Courses</span>
+            <span class="detail-value">{{ enrolledCourses().length }} enrolled · {{ completedCourses() }} completed</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">✅ Attendance</span>
+            <span class="detail-value">{{ attendancePercent() }}% overall</span>
+          </div>
+        </div>
+      </div>
+    }
+
+  </main>
+</div>
