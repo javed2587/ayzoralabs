@@ -1,0 +1,340 @@
+@if (course()) {
+  <!-- ══ BREADCRUMB ══════════════════════════════════════════════════════ -->
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <a routerLink="/">Home</a>
+      <span class="sep">›</span>
+      <a routerLink="/courses">Courses</a>
+      <span class="sep">›</span>
+      <span class="current">{{ course()!.title }}</span>
+    </div>
+  </div>
+
+  <!-- ══ HERO ════════════════════════════════════════════════════════════ -->
+  <section class="detail-hero {{ course()!.color }}">
+    <div class="container">
+      <div class="hero-layout">
+
+        <!-- Left — text content -->
+        <div class="hero-text">
+          @if (course()!.badge) {
+            <span class="hero-badge">{{ course()!.badge }}</span>
+          }
+          <h1 class="hero-title">{{ course()!.title }}</h1>
+          <p class="hero-subtitle">{{ course()!.subtitle }}</p>
+
+          <!-- Rating strip -->
+          <div class="rating-strip">
+            <span class="stars">{{ getStars(course()!.rating) }}</span>
+            <span class="rating-val">{{ course()!.rating }}</span>
+            <span class="rating-count">({{ course()!.students.toLocaleString() }} students)</span>
+            <span class="sep-dot">·</span>
+            <span class="level-pill">{{ course()!.level }}</span>
+            <span class="sep-dot">·</span>
+            <span class="lang">🌐 {{ course()!.language }}</span>
+          </div>
+
+          <!-- Teacher row -->
+          <div class="hero-teacher">
+            <div class="t-avatar">{{ course()!.teacherAvatar }}</div>
+            <div>
+              <span class="t-label">Created by </span>
+              <span class="t-name">{{ course()!.teacher }}</span>
+            </div>
+          </div>
+
+          <!-- Quick stats -->
+          <div class="quick-stats">
+            <div class="qs-item">
+              <span class="qs-icon">📅</span>
+              <span>{{ course()!.sessions }} sessions</span>
+            </div>
+            <div class="qs-item">
+              <span class="qs-icon">⏱️</span>
+              <span>{{ course()!.duration }}</span>
+            </div>
+            <div class="qs-item">
+              <span class="qs-icon">📚</span>
+              <span>{{ totalTopics() }} topics</span>
+            </div>
+            <div class="qs-item">
+              <span class="qs-icon">🏆</span>
+              <span>Certificate included</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right — video card (desktop) -->
+        <div class="hero-card">
+          <div class="video-box">
+            @if (!videoPlaying()) {
+              <div class="video-thumb {{ course()!.color }}" (click)="playVideo()">
+                <div class="course-icon-big">{{ course()!.icon }}</div>
+                <button class="play-btn" aria-label="Play preview video">
+                  <span class="play-triangle">▶</span>
+                </button>
+                <span class="preview-label">Preview this course</span>
+              </div>
+            } @else {
+              <iframe
+                [src]="course()!.videoUrl"
+                class="video-iframe"
+                frameborder="0"
+                allow="autoplay; encrypted-media"
+                allowfullscreen
+                title="Course preview">
+              </iframe>
+            }
+          </div>
+
+          <!-- Price & Enroll -->
+          <div class="enroll-box">
+            <div class="price-row">
+              <span class="price-main">{{ formatPrice(course()!.price) }}</span>
+              <span class="price-original">{{ formatPrice(course()!.originalPrice) }}</span>
+              <span class="discount-badge">{{ discount() }}% OFF</span>
+            </div>
+
+            @if (enrollSuccess()) {
+              <div class="enroll-success">
+                ✅ Redirecting to registration...
+              </div>
+            } @else {
+              <button class="btn-enroll" (click)="onEnroll()">
+                Enroll Now — {{ formatPrice(course()!.price) }}
+              </button>
+            }
+
+            <button class="btn-trial" routerLink="/register">
+              Start Free Trial First
+            </button>
+
+            <ul class="includes-list">
+              <li>✅ {{ course()!.sessions }} live sessions</li>
+              <li>✅ Recording of every class</li>
+              <li>✅ Assignments & projects</li>
+              <li>✅ Certificate of completion</li>
+              <li>✅ Parent progress reports</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ TABS ════════════════════════════════════════════════════════════ -->
+  <div class="tabs-bar">
+    <div class="container">
+      <div class="tabs">
+        <button class="tab" [class.tab-active]="activeTab() === 'overview'"  (click)="setTab('overview')">Overview</button>
+        <button class="tab" [class.tab-active]="activeTab() === 'syllabus'"  (click)="setTab('syllabus')">Syllabus</button>
+        <button class="tab" [class.tab-active]="activeTab() === 'teacher'"   (click)="setTab('teacher')">Instructor</button>
+        <button class="tab" [class.tab-active]="activeTab() === 'reviews'"   (click)="setTab('reviews')">Reviews</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB CONTENT ════════════════════════════════════════════════════ -->
+  <section class="tab-content-section">
+    <div class="container tab-layout">
+
+      <!-- ── MAIN CONTENT ── -->
+      <div class="tab-main">
+
+        <!-- OVERVIEW TAB -->
+        @if (activeTab() === 'overview') {
+          <div class="tab-panel">
+
+            <!-- What you'll learn -->
+            <div class="content-card">
+              <h2 class="card-heading">What You'll Learn</h2>
+              <div class="learn-grid">
+                @for (item of course()!.whatYouLearn; track item) {
+                  <div class="learn-item">
+                    <span class="check">✓</span>
+                    <span>{{ item }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Course description -->
+            <div class="content-card">
+              <h2 class="card-heading">About This Course</h2>
+              <p class="desc-text">{{ course()!.description }}</p>
+            </div>
+
+            <!-- Requirements -->
+            <div class="content-card">
+              <h2 class="card-heading">Requirements</h2>
+              <ul class="req-list">
+                @for (req of course()!.requirements; track req) {
+                  <li>{{ req }}</li>
+                }
+              </ul>
+            </div>
+
+          </div>
+        }
+
+        <!-- SYLLABUS TAB -->
+        @if (activeTab() === 'syllabus') {
+          <div class="tab-panel">
+            <div class="content-card">
+              <div class="syllabus-header">
+                <h2 class="card-heading">Course Syllabus</h2>
+                <span class="syllabus-meta">
+                  {{ course()!.syllabus.length }} weeks · {{ totalTopics() }} topics
+                </span>
+              </div>
+
+              <div class="accordion">
+                @for (week of course()!.syllabus; track week.week) {
+                  <div class="accordion-item" [class.acc-open]="expandedWeek() === week.week">
+
+                    <!-- Accordion header -->
+                    <button class="acc-header" (click)="toggleWeek(week.week)">
+                      <div class="acc-left">
+                        <span class="week-num">Week {{ week.week }}</span>
+                        <span class="week-title">{{ week.title }}</span>
+                      </div>
+                      <div class="acc-right">
+                        <span class="week-duration">{{ week.duration }}</span>
+                        <span class="acc-arrow">
+                          {{ expandedWeek() === week.week ? '▲' : '▼' }}
+                        </span>
+                      </div>
+                    </button>
+
+                    <!-- Accordion body -->
+                    @if (expandedWeek() === week.week) {
+                      <div class="acc-body">
+                        @for (topic of week.topics; track topic) {
+                          <div class="topic-row">
+                            <span class="topic-dot">▶</span>
+                            <span class="topic-text">{{ topic }}</span>
+                          </div>
+                        }
+                      </div>
+                    }
+
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- TEACHER TAB -->
+        @if (activeTab() === 'teacher') {
+          <div class="tab-panel">
+            <div class="content-card">
+              <h2 class="card-heading">Your Instructor</h2>
+              <div class="teacher-profile">
+
+                <div class="teacher-top">
+                  <div class="teacher-avatar-lg">{{ course()!.teacherAvatar }}</div>
+                  <div class="teacher-details">
+                    <h3 class="teacher-name">{{ course()!.teacher }}</h3>
+                    <p class="teacher-title">Senior Instructor · {{ course()!.category }}</p>
+                    <div class="teacher-stats">
+                      <div class="ts-item">
+                        <span class="ts-val">{{ getStars(course()!.teacherRating) }} {{ course()!.teacherRating }}</span>
+                        <span class="ts-lbl">Rating</span>
+                      </div>
+                      <div class="ts-item">
+                        <span class="ts-val">{{ course()!.teacherStudents.toLocaleString() }}</span>
+                        <span class="ts-lbl">Students</span>
+                      </div>
+                      <div class="ts-item">
+                        <span class="ts-val">{{ course()!.teacherCourses }}</span>
+                        <span class="ts-lbl">Courses</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <p class="teacher-bio">{{ course()!.teacherBio }}</p>
+
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- REVIEWS TAB -->
+        @if (activeTab() === 'reviews') {
+          <div class="tab-panel">
+            <div class="content-card">
+              <div class="reviews-header">
+                <h2 class="card-heading">Student Reviews</h2>
+                <div class="overall-rating">
+                  <span class="big-rating">{{ course()!.rating }}</span>
+                  <div>
+                    <div class="big-stars">{{ getStars(course()!.rating) }}</div>
+                    <div class="big-count">Course Rating</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="reviews-list">
+                @for (review of course()!.reviews; track review.name) {
+                  <div class="review-card">
+                    <div class="review-top">
+                      <div class="reviewer-avatar">{{ review.avatar }}</div>
+                      <div class="reviewer-info">
+                        <div class="reviewer-name">{{ review.name }}</div>
+                        <div class="reviewer-meta">
+                          <span class="r-stars">{{ getStars(review.rating) }}</span>
+                          <span class="r-date">{{ review.date }}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <p class="review-text">{{ review.text }}</p>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+
+      </div>
+
+      <!-- ── STICKY SIDEBAR (mobile enroll CTA) ── -->
+      <aside class="tab-sidebar">
+        <div class="sidebar-card">
+          <div class="price-row">
+            <span class="price-main">{{ formatPrice(course()!.price) }}</span>
+            <span class="price-original">{{ formatPrice(course()!.originalPrice) }}</span>
+            <span class="discount-badge">{{ discount() }}% OFF</span>
+          </div>
+
+          @if (enrollSuccess()) {
+            <div class="enroll-success">✅ Redirecting...</div>
+          } @else {
+            <button class="btn-enroll" (click)="onEnroll()">Enroll Now</button>
+          }
+
+          <button class="btn-trial" routerLink="/register">Free Trial</button>
+
+          <ul class="includes-list">
+            <li>✅ {{ course()!.sessions }} live sessions</li>
+            <li>✅ Class recordings</li>
+            <li>✅ Certificate</li>
+            <li>✅ Parent dashboard access</li>
+          </ul>
+        </div>
+      </aside>
+
+    </div>
+  </section>
+
+} @else {
+  <!-- Loading / Not Found state -->
+  <div class="not-found">
+    <div class="nf-icon">📚</div>
+    <h2>Course not found</h2>
+    <p>The course you are looking for does not exist.</p>
+    <a routerLink="/courses" class="btn-back">← Back to Courses</a>
+  </div>
+}
