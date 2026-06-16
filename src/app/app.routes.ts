@@ -32,6 +32,12 @@ export const routes: Routes = [
     .then(m => m.StudentDashboardComponent)
   },
   {
+    path: 'student/register',
+    loadComponent: () => 
+      import('./features/student/student-registration/student-registration.component')
+    .then(m => m.StudentRegistrationComponent)
+  },
+  {
     path: 'admin',
     loadComponent: () =>
       import('./features/admin/admin/admin').then(m => m.Admin)

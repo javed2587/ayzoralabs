@@ -1,0 +1,578 @@
+<div class="reg-wrapper">
+
+  <!-- ══ SUCCESS SCREEN ══════════════════════════════════════════════════ -->
+  @if (submitSuccess()) {
+    <div class="success-screen">
+      <div class="success-card">
+        <div class="success-icon">🎉</div>
+        <h2 class="success-title">Registration Successful!</h2>
+        <p class="success-msg">
+          Welcome to Ayzatech! Your registration has been submitted.
+          Our team will contact you within 24 hours to confirm your enrollment.
+        </p>
+        @if (selectedCourse()) {
+          <div class="success-course">
+            <span class="sc-icon">{{ selectedCourse()!.icon }}</span>
+            <div>
+              <div class="sc-title">{{ selectedCourse()!.title }}</div>
+              <div class="sc-meta">{{ selectedCourse()!.duration }} · {{ formatPrice(selectedCourse()!.price) }}</div>
+            </div>
+          </div>
+        }
+        <button class="btn-primary" (click)="goToDashboard()">
+          Go to Dashboard →
+        </button>
+        <a routerLink="/courses" class="btn-outline-link">Browse More Courses</a>
+      </div>
+    </div>
+  }
+
+  <!-- ══ REGISTRATION FORM ═══════════════════════════════════════════════ -->
+  @if (!submitSuccess()) {
+
+    <!-- Page Header -->
+    <div class="reg-header">
+      <div class="container">
+        <a routerLink="/" class="reg-logo">
+          <span class="logo-icon">A</span>
+          <span class="logo-text">Ayza<strong>tech</strong></span>
+        </a>
+        <div class="header-right">
+          Already registered?
+          <a routerLink="/login" class="login-link">Login here →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="reg-body">
+      <div class="container">
+        <div class="reg-layout">
+
+          <!-- ── LEFT — Form ── -->
+          <div class="form-side">
+
+            <!-- Step Progress Bar -->
+            <div class="progress-wrap">
+              <div class="progress-bar-outer">
+                <div class="progress-bar-inner"
+                     [style.width]="progressPercent() + '%'">
+                </div>
+              </div>
+              <span class="progress-label">
+                Step {{ currentStep() }} of 3 — {{ progressPercent() }}% complete
+              </span>
+            </div>
+
+            <!-- Step Indicators -->
+            <div class="step-indicators">
+              <div class="step-ind" [class.ind-done]="currentStep() > 1" [class.ind-active]="currentStep() === 1">
+                <div class="ind-circle">
+                  @if (currentStep() > 1) { ✓ } @else { 1 }
+                </div>
+                <span class="ind-label">Student Info</span>
+              </div>
+              <div class="step-line" [class.line-done]="currentStep() > 1"></div>
+              <div class="step-ind" [class.ind-done]="currentStep() > 2" [class.ind-active]="currentStep() === 2">
+                <div class="ind-circle">
+                  @if (currentStep() > 2) { ✓ } @else { 2 }
+                </div>
+                <span class="ind-label">Parent Info</span>
+              </div>
+              <div class="step-line" [class.line-done]="currentStep() > 2"></div>
+              <div class="step-ind" [class.ind-active]="currentStep() === 3">
+                <div class="ind-circle">3</div>
+                <span class="ind-label">Course</span>
+              </div>
+            </div>
+
+            <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" novalidate>
+
+              <!-- ══ STEP 1 — Student Info ══════════════════════════════ -->
+              @if (currentStep() === 1) {
+                <div class="form-card">
+                  <div class="form-card-header">
+                    <h2 class="form-card-title">👤 Student Information</h2>
+                    <p class="form-card-sub">Tell us about the student joining Ayzatech</p>
+                  </div>
+
+                  <!-- Photo Upload -->
+                  <div class="photo-upload-section">
+                    <div class="photo-preview">
+                      @if (photoPreview()) {
+                        <img [src]="photoPreview()!" alt="Profile photo" class="photo-img" />
+                        <button type="button" class="remove-photo" (click)="removePhoto()">✕</button>
+                      } @else {
+                        <div class="photo-placeholder">
+                          <span class="photo-icon">📷</span>
+                          <span class="photo-text">Photo</span>
+                        </div>
+                      }
+                    </div>
+                    <div class="photo-actions">
+                      <label class="btn-upload" for="photoInput">
+                        📸 Upload Photo
+                      </label>
+                      <input
+                        id="photoInput"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        class="hidden-input"
+                        (change)="onPhotoSelected($event)"
+                      />
+                      <p class="photo-hint">JPG, PNG or WebP · Max 2MB · Optional</p>
+                    </div>
+                  </div>
+
+                  <div class="form-grid">
+
+                    <!-- Full Name -->
+                    <div class="form-group full-width">
+                      <label class="form-label">Full Name <span class="required">*</span></label>
+                      <div class="input-wrap">
+                        <span class="input-icon">👤</span>
+                        <input
+                          type="text"
+                          formControlName="fullName"
+                          class="form-input"
+                          [class.input-error]="fullName?.invalid && fullName?.touched"
+                          placeholder="Muhammad Ali Hassan"
+                        />
+                      </div>
+                      @if (fullName?.invalid && fullName?.touched) {
+                        <div class="error-msg">
+                          @if (fullName?.errors?.['required'])  { Full name is required. }
+                          @if (fullName?.errors?.['minlength']) { Name must be at least 3 characters. }
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Date of Birth -->
+                    <div class="form-group">
+                      <label class="form-label">Date of Birth <span class="required">*</span></label>
+                      <div class="input-wrap">
+                        <span class="input-icon">🎂</span>
+                        <input
+                          type="date"
+                          formControlName="dateOfBirth"
+                          class="form-input"
+                          [class.input-error]="dateOfBirth?.invalid && dateOfBirth?.touched"
+                        />
+                      </div>
+                      @if (dateOfBirth?.invalid && dateOfBirth?.touched) {
+                        <div class="error-msg">
+                          @if (dateOfBirth?.errors?.['required'])  { Date of birth is required. }
+                          @if (dateOfBirth?.errors?.['ageRange'])  { Student must be between 7 and 17 years old. }
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Gender -->
+                    <div class="form-group">
+                      <label class="form-label">Gender <span class="required">*</span></label>
+                      <div class="input-wrap">
+                        <span class="input-icon">⚧</span>
+                        <select
+                          formControlName="gender"
+                          class="form-input form-select"
+                          [class.input-error]="gender?.invalid && gender?.touched">
+                          <option value="">Select gender</option>
+                          @for (g of genders; track g) {
+                            <option [value]="g">{{ g }}</option>
+                          }
+                        </select>
+                      </div>
+                      @if (gender?.invalid && gender?.touched) {
+                        <div class="error-msg">Please select a gender.</div>
+                      }
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group">
+                      <label class="form-label">Email Address <span class="required">*</span></label>
+                      <div class="input-wrap">
+                        <span class="input-icon">✉️</span>
+                        <input
+                          type="email"
+                          formControlName="email"
+                          class="form-input"
+                          [class.input-error]="email?.invalid && email?.touched"
+                          placeholder="student@gmail.com"
+                        />
+                      </div>
+                      @if (email?.invalid && email?.touched) {
+                        <div class="error-msg">
+                          @if (email?.errors?.['required']) { Email is required. }
+                          @if (email?.errors?.['email'])    { Please enter a valid email address. }
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="form-group">
+                      <label class="form-label">Phone Number <span class="required">*</span></label>
+                      <div class="input-wrap">
+                        <span class="input-icon">📱</span>
+                        <input
+                          type="tel"
+                          formControlName="phone"
+                          class="form-input"
+                          [class.input-error]="phone?.invalid && phone?.touched"
+                          placeholder="03001234567"
+                        />
+                      </div>
+                      @if (phone?.invalid && phone?.touched) {
+                        <div class="error-msg">
+                          @if (phone?.errors?.['required'])      { Phone number is required. }
+                          @if (phone?.errors?.['invalidPhone'])  { Enter valid Pakistan number e.g. 03001234567 }
+                        </div>
+                      }
+                    </div>
+
+                  </div>
+
+                  <!-- Next Button -->
+                  <div class="form-actions">
+                    <button type="button" class="btn-next" (click)="nextStep()">
+                      Continue to Parent Info →
+                    </button>
+                  </div>
+                </div>
+              }
+
+              <!-- ══ STEP 2 — Parent Info ════════════════════════════════ -->
+              @if (currentStep() === 2) {
+                <div class="form-card">
+                  <div class="form-card-header">
+                    <h2 class="form-card-title">👨‍👩‍👧 Parent / Guardian Information</h2>
+                    <p class="form-card-sub">We keep parents updated on their child's progress</p>
+                  </div>
+
+                  <div class="form-grid">
+
+                    <!-- Parent Name -->
+                    <div class="form-group full-width">
+                      <label class="form-label">Parent / Guardian Name <span class="required">*</span></label>
+                      <div class="input-wrap">
+                        <span class="input-icon">👤</span>
+                        <input
+                          type="text"
+                          formControlName="parentName"
+                          class="form-input"
+                          [class.input-error]="parentName?.invalid && parentName?.touched"
+                          placeholder="Hassan Ahmed"
+                        />
+                      </div>
+                      @if (parentName?.invalid && parentName?.touched) {
+                        <div class="error-msg">
+                          @if (parentName?.errors?.['required'])  { Parent name is required. }
+                          @if (parentName?.errors?.['minlength']) { Name must be at least 3 characters. }
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Parent Phone -->
+                    <div class="form-group">
+                      <label class="form-label">Parent Phone <span class="required">*</span></label>
+                      <div class="input-wrap">
+                        <span class="input-icon">📱</span>
+                        <input
+                          type="tel"
+                          formControlName="parentPhone"
+                          class="form-input"
+                          [class.input-error]="parentPhone?.invalid && parentPhone?.touched"
+                          placeholder="03001234567"
+                        />
+                      </div>
+                      @if (parentPhone?.invalid && parentPhone?.touched) {
+                        <div class="error-msg">
+                          @if (parentPhone?.errors?.['required'])     { Parent phone is required. }
+                          @if (parentPhone?.errors?.['invalidPhone']) { Enter valid Pakistan number. }
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Parent Email -->
+                    <div class="form-group">
+                      <label class="form-label">Parent Email <span class="required">*</span></label>
+                      <div class="input-wrap">
+                        <span class="input-icon">✉️</span>
+                        <input
+                          type="email"
+                          formControlName="parentEmail"
+                          class="form-input"
+                          [class.input-error]="parentEmail?.invalid && parentEmail?.touched"
+                          placeholder="parent@gmail.com"
+                        />
+                      </div>
+                      @if (parentEmail?.invalid && parentEmail?.touched) {
+                        <div class="error-msg">
+                          @if (parentEmail?.errors?.['required']) { Parent email is required. }
+                          @if (parentEmail?.errors?.['email'])    { Please enter a valid email. }
+                        </div>
+                      }
+                    </div>
+
+                    <!-- City -->
+                    <div class="form-group">
+                      <label class="form-label">City <span class="required">*</span></label>
+                      <div class="input-wrap">
+                        <span class="input-icon">🏙️</span>
+                        <select
+                          formControlName="city"
+                          class="form-input form-select"
+                          [class.input-error]="city?.invalid && city?.touched">
+                          <option value="">Select your city</option>
+                          @for (c of ['Lahore','Karachi','Islamabad','Rawalpindi','Faisalabad','Multan','Peshawar','Quetta','Other']; track c) {
+                            <option [value]="c">{{ c }}</option>
+                          }
+                        </select>
+                      </div>
+                      @if (city?.invalid && city?.touched) {
+                        <div class="error-msg">Please select your city.</div>
+                      }
+                    </div>
+
+                    <!-- Address -->
+                    <div class="form-group full-width">
+                      <label class="form-label">Home Address <span class="required">*</span></label>
+                      <div class="input-wrap textarea-wrap">
+                        <span class="input-icon textarea-icon">🏠</span>
+                        <textarea
+                          formControlName="address"
+                          class="form-input form-textarea"
+                          [class.input-error]="address?.invalid && address?.touched"
+                          placeholder="House No, Street, Area, City"
+                          rows="3">
+                        </textarea>
+                      </div>
+                      @if (address?.invalid && address?.touched) {
+                        <div class="error-msg">
+                          @if (address?.errors?.['required'])  { Address is required. }
+                          @if (address?.errors?.['minlength']) { Please enter a complete address (min 10 characters). }
+                        </div>
+                      }
+                    </div>
+
+                  </div>
+
+                  <!-- Navigation Buttons -->
+                  <div class="form-actions two-btn">
+                    <button type="button" class="btn-back" (click)="prevStep()">← Back</button>
+                    <button type="button" class="btn-next" (click)="nextStep()">Continue to Course →</button>
+                  </div>
+                </div>
+              }
+
+              <!-- ══ STEP 3 — Course Selection ═══════════════════════════ -->
+              @if (currentStep() === 3) {
+                <div class="form-card">
+                  <div class="form-card-header">
+                    <h2 class="form-card-title">📚 Select Your Course</h2>
+                    <p class="form-card-sub">Choose the course you want to enroll in</p>
+                  </div>
+
+                  <!-- Course Cards -->
+                  <div class="course-selection-grid">
+                    @for (course of courses; track course.id) {
+                      <div
+                        class="course-option"
+                        [class.course-selected]="isCourseSelected(course.id)"
+                        (click)="selectCourse(course)">
+                        <div class="co-icon">{{ course.icon }}</div>
+                        <div class="co-info">
+                          <div class="co-title">{{ course.title }}</div>
+                          <div class="co-meta">{{ course.duration }}</div>
+                        </div>
+                        <div class="co-price">{{ formatPrice(course.price) }}</div>
+                        @if (isCourseSelected(course.id)) {
+                          <span class="co-check">✓</span>
+                        }
+                      </div>
+                    }
+                  </div>
+                  @if (courseId?.invalid && courseId?.touched) {
+                    <div class="error-msg" style="margin-bottom: 16px;">
+                      Please select a course to continue.
+                    </div>
+                  }
+
+                  <!-- Experience Level -->
+                  <div class="form-group">
+                    <label class="form-label">Prior Coding Experience</label>
+                    <div class="experience-options">
+                      @for (exp of [
+                        { value: 'beginner',     label: 'Beginner',      icon: '🌱' },
+                        { value: 'some',         label: 'Some basics',   icon: '📗' },
+                        { value: 'intermediate', label: 'Intermediate',  icon: '⚡' }
+                      ]; track exp.value) {
+                        <label class="exp-option"
+                          [class.exp-selected]="registrationForm.get('experience')?.value === exp.value">
+                          <input type="radio" formControlName="experience" [value]="exp.value" />
+                          <span class="exp-icon">{{ exp.icon }}</span>
+                          <span class="exp-label">{{ exp.label }}</span>
+                        </label>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Learning Goals -->
+                  <div class="form-group">
+                    <label class="form-label">
+                      Learning Goals <span class="required">*</span>
+                      <span class="label-hint">(min 20 characters)</span>
+                    </label>
+                    <div class="input-wrap textarea-wrap">
+                      <textarea
+                        formControlName="goals"
+                        class="form-input form-textarea"
+                        [class.input-error]="goals?.invalid && goals?.touched"
+                        placeholder="What do you want to achieve by learning coding? e.g. I want to build my own game and learn to make apps..."
+                        rows="4">
+                      </textarea>
+                    </div>
+                    <div class="char-count">
+                      {{ registrationForm.get('goals')?.value?.length || 0 }} characters
+                    </div>
+                    @if (goals?.invalid && goals?.touched) {
+                      <div class="error-msg">
+                        @if (goals?.errors?.['required'])  { Please share your learning goals. }
+                        @if (goals?.errors?.['minlength']) { Please write at least 20 characters. }
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Terms -->
+                  <div class="terms-section">
+                    <label class="terms-label">
+                      <input type="checkbox" formControlName="terms" class="terms-check" />
+                      <span>
+                        I agree to Ayzatech's
+                        <a routerLink="/terms" class="terms-link">Terms of Service</a>,
+                        <a routerLink="/privacy" class="terms-link">Privacy Policy</a>,
+                        and confirm all information provided is accurate.
+                      </span>
+                    </label>
+                    @if (terms?.invalid && terms?.touched) {
+                      <div class="error-msg">You must accept the terms to register.</div>
+                    }
+                  </div>
+
+                  <!-- Submit Buttons -->
+                  <div class="form-actions two-btn">
+                    <button type="button" class="btn-back" (click)="prevStep()">← Back</button>
+                    <button
+                      type="submit"
+                      class="btn-submit"
+                      [disabled]="isLoading()">
+                      @if (isLoading()) {
+                        <span class="spinner"></span> Registering...
+                      } @else {
+                        🎓 Complete Registration
+                      }
+                    </button>
+                  </div>
+
+                </div>
+              }
+
+            </form>
+          </div>
+
+          <!-- ── RIGHT — Summary Sidebar ── -->
+          <div class="summary-side">
+            <div class="summary-card">
+              <h3 class="summary-title">📋 Registration Summary</h3>
+
+              <!-- Student Info -->
+              <div class="summary-section">
+                <div class="summary-label">Student</div>
+                <div class="summary-value">
+                  {{ fullName?.value || '—' }}
+                </div>
+              </div>
+
+              <div class="summary-section">
+                <div class="summary-label">Email</div>
+                <div class="summary-value small">
+                  {{ email?.value || '—' }}
+                </div>
+              </div>
+
+              <div class="summary-section">
+                <div class="summary-label">Phone</div>
+                <div class="summary-value">
+                  {{ phone?.value || '—' }}
+                </div>
+              </div>
+
+              <div class="summary-divider"></div>
+
+              <!-- Parent Info -->
+              <div class="summary-section">
+                <div class="summary-label">Parent</div>
+                <div class="summary-value">
+                  {{ parentName?.value || '—' }}
+                </div>
+              </div>
+
+              <div class="summary-section">
+                <div class="summary-label">City</div>
+                <div class="summary-value">
+                  {{ city?.value || '—' }}
+                </div>
+              </div>
+
+              <div class="summary-divider"></div>
+
+              <!-- Course Info -->
+              @if (selectedCourse()) {
+                <div class="summary-course-card">
+                  <span class="sc-icon-lg">{{ selectedCourse()!.icon }}</span>
+                  <div>
+                    <div class="sc-name">{{ selectedCourse()!.title }}</div>
+                    <div class="sc-dur">{{ selectedCourse()!.duration }}</div>
+                    <div class="sc-fee">{{ formatPrice(selectedCourse()!.price) }}</div>
+                  </div>
+                </div>
+              } @else {
+                <div class="summary-section">
+                  <div class="summary-label">Course</div>
+                  <div class="summary-value muted">Not selected yet</div>
+                </div>
+              }
+
+              <div class="summary-divider"></div>
+
+              <!-- Steps progress -->
+              <div class="summary-steps">
+                <div class="ss-item" [class.ss-done]="currentStep() > 1" [class.ss-active]="currentStep() === 1">
+                  @if (currentStep() > 1) { ✅ } @else { ⬜ }
+                  Student Info
+                </div>
+                <div class="ss-item" [class.ss-done]="currentStep() > 2" [class.ss-active]="currentStep() === 2">
+                  @if (currentStep() > 2) { ✅ } @else { ⬜ }
+                  Parent Info
+                </div>
+                <div class="ss-item" [class.ss-active]="currentStep() === 3">
+                  ⬜ Course Selection
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Help Card -->
+            <div class="help-card">
+              <div class="help-icon">💬</div>
+              <h4 class="help-title">Need Help?</h4>
+              <p class="help-text">Our team is available to assist you with registration.</p>
+              <a href="tel:+923001234567" class="help-link">📞 0300-1234567</a>
+              <a href="mailto:info@ayzatech.com" class="help-link">✉️ info@ayzatech.com</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  }
+
+</div>
