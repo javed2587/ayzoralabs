@@ -1,0 +1,473 @@
+<div class="admin-wrapper">
+
+  <!-- ══ MOBILE HEADER ════════════════════════════════════════════════════ -->
+  <header class="mobile-header">
+    <button class="hamburger-btn" (click)="toggleSidebar()">☰</button>
+    <div class="mobile-logo">
+      <span class="logo-icon">A</span>
+      <span>Ayza<strong>tech</strong> Admin</span>
+    </div>
+    <div class="mobile-avatar">{{ admin.avatar }}</div>
+  </header>
+
+  <!-- ══ SIDEBAR ══════════════════════════════════════════════════════════ -->
+  <aside class="sidebar" [class.sidebar-open]="sidebarOpen()">
+
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <a routerLink="/" class="logo-link">
+        <span class="logo-icon">A</span>
+        <span class="logo-text">Ayza<strong>tech</strong></span>
+      </a>
+      <span class="admin-badge">Admin</span>
+    </div>
+
+    <!-- Admin Profile -->
+    <div class="admin-profile">
+      <div class="admin-avatar">{{ admin.avatar }}</div>
+      <div class="admin-info">
+        <div class="admin-name">{{ admin.name }}</div>
+        <div class="admin-role">{{ admin.role }}</div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">MAIN MENU</div>
+      @for (item of navItems.slice(0, 5); track item.section) {
+        <button
+          class="nav-item"
+          [class.nav-active]="activeSection() === item.section"
+          (click)="setSection(item.section)">
+          <span class="nav-icon">{{ item.icon }}</span>
+          <span class="nav-label">{{ item.label }}</span>
+          @if (item.badge) {
+            <span class="nav-badge"
+              [class.badge-red]="item.section === 'fees'">
+              {{ item.badge }}
+            </span>
+          }
+        </button>
+      }
+
+      <div class="nav-section-label">MANAGEMENT</div>
+      @for (item of navItems.slice(5); track item.section) {
+        <button
+          class="nav-item"
+          [class.nav-active]="activeSection() === item.section"
+          (click)="setSection(item.section)">
+          <span class="nav-icon">{{ item.icon }}</span>
+          <span class="nav-label">{{ item.label }}</span>
+          @if (item.badge) {
+            <span class="nav-badge badge-red">{{ item.badge }}</span>
+          }
+        </button>
+      }
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <a routerLink="/" class="footer-link">🌐 View Website</a>
+      <a routerLink="/login" class="footer-link logout">🚪 Logout</a>
+    </div>
+
+  </aside>
+
+  <!-- Mobile Overlay -->
+  @if (sidebarOpen()) {
+    <div class="sidebar-overlay" (click)="toggleSidebar()"></div>
+  }
+
+  <!-- ══ MAIN CONTENT ══════════════════════════════════════════════════════ -->
+  <main class="admin-main">
+
+    <!-- ── DASHBOARD ──────────────────────────────────────────────────── -->
+    @if (activeSection() === 'dashboard') {
+
+      <!-- Page Header -->
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Dashboard Overview</h1>
+          <p class="page-sub">Welcome back, {{ admin.name }}! Here is what is happening today.</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-secondary">📊 Export Report</button>
+          <button class="btn-primary" (click)="setSection('students')">+ Add Student</button>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        @for (stat of stats; track stat.title) {
+          <div class="stat-card {{ stat.color }}">
+            <div class="stat-top">
+              <div class="stat-icon">{{ stat.icon }}</div>
+              <div class="stat-trend" [class.trend-up]="stat.trend === 'up'" [class.trend-down]="stat.trend === 'down'">
+                {{ stat.trend === 'up' ? '↑' : '↓' }}
+              </div>
+            </div>
+            <div class="stat-value">{{ stat.value }}</div>
+            <div class="stat-title">{{ stat.title }}</div>
+            <div class="stat-change">{{ stat.change }}</div>
+          </div>
+        }
+      </div>
+
+      <!-- Dashboard Grid -->
+      <div class="dashboard-grid">
+
+        <!-- Recent Activity -->
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <h2 class="dash-card-title">🕐 Recent Activity</h2>
+            <span class="dash-card-sub">Last 24 hours</span>
+          </div>
+          <div class="activity-list">
+            @for (activity of recentActivity; track activity.id) {
+              <div class="activity-item">
+                <div class="activity-icon">{{ activity.icon }}</div>
+                <div class="activity-info">
+                  <div class="activity-msg">{{ activity.message }}</div>
+                  <div class="activity-time">{{ activity.time }}</div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="dash-right">
+
+          <!-- Fee Status -->
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <h2 class="dash-card-title">💰 Fee Status</h2>
+            </div>
+            <div class="fee-stats">
+              <div class="fee-item fee-paid">
+                <span class="fee-count">{{ students.filter(s => s.fee === 'paid').length }}</span>
+                <span class="fee-label">Paid</span>
+              </div>
+              <div class="fee-item fee-pending">
+                <span class="fee-count">{{ students.filter(s => s.fee === 'pending').length }}</span>
+                <span class="fee-label">Pending</span>
+              </div>
+              <div class="fee-item fee-overdue">
+                <span class="fee-count">{{ students.filter(s => s.fee === 'overdue').length }}</span>
+                <span class="fee-label">Overdue</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top Teachers -->
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <h2 class="dash-card-title">👨‍🏫 Top Teachers</h2>
+              <button class="view-all" (click)="setSection('teachers')">View all</button>
+            </div>
+            <div class="teacher-mini-list">
+              @for (teacher of teachers.slice(0, 3); track teacher.id) {
+                <div class="teacher-mini-item">
+                  <div class="t-mini-avatar">{{ teacher.avatar }}</div>
+                  <div class="t-mini-info">
+                    <div class="t-mini-name">{{ teacher.name }}</div>
+                    <div class="t-mini-sub">{{ teacher.subject }}</div>
+                  </div>
+                  <div class="t-mini-count">{{ teacher.students }} students</div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <h2 class="dash-card-title">⚡ Quick Actions</h2>
+            </div>
+            <div class="quick-actions">
+              <button class="qa-btn" (click)="setSection('students')">
+                <span>👨‍🎓</span> Add Student
+              </button>
+              <button class="qa-btn" (click)="setSection('teachers')">
+                <span>👨‍🏫</span> Add Teacher
+              </button>
+              <button class="qa-btn" (click)="setSection('courses')">
+                <span>📚</span> Add Course
+              </button>
+              <button class="qa-btn" (click)="setSection('fees')">
+                <span>💰</span> Record Fee
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    }
+
+    <!-- ── STUDENTS ────────────────────────────────────────────────────── -->
+    @if (activeSection() === 'students') {
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Students Management</h1>
+          <p class="page-sub">
+            {{ activeStudents() }} active · {{ students.length }} total
+          </p>
+        </div>
+        <div class="header-actions">
+          <a routerLink="/student/register" class="btn-primary">+ Add Student</a>
+        </div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="search-bar-wrap">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          class="search-bar"
+          placeholder="Search students by name, email or course..."
+          (input)="onSearch($event)"
+        />
+      </div>
+
+      <!-- Students Table -->
+      <div class="table-card">
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Course</th>
+                <th>Status</th>
+                <th>Fee</th>
+                <th>Joined</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (student of filteredStudents(); track student.id) {
+                <tr>
+                  <td>
+                    <div class="student-cell">
+                      <div class="cell-avatar">{{ student.avatar }}</div>
+                      <div class="cell-info">
+                        <div class="cell-name">{{ student.name }}</div>
+                        <div class="cell-email">{{ student.email }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="course-cell">{{ student.course }}</td>
+                  <td>
+                    <span class="status-badge"
+                      [class.badge-active]="student.status === 'active'"
+                      [class.badge-inactive]="student.status === 'inactive'">
+                      {{ student.status }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="fee-badge"
+                      [class.fee-paid]="student.fee === 'paid'"
+                      [class.fee-pending]="student.fee === 'pending'"
+                      [class.fee-overdue]="student.fee === 'overdue'">
+                      {{ student.fee }}
+                    </span>
+                  </td>
+                  <td class="date-cell">{{ student.joined }}</td>
+                  <td>
+                    <div class="action-btns">
+                      <button class="action-btn edit-btn">✏️</button>
+                      <button class="action-btn view-btn">👁️</button>
+                      <button class="action-btn delete-btn">🗑️</button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- No results -->
+        @if (filteredStudents().length === 0) {
+          <div class="no-results">
+            <div>🔍</div>
+            <p>No students found matching your search.</p>
+            <button class="btn-secondary" (click)="searchQuery.set('')">
+              Clear Search
+            </button>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ── TEACHERS ────────────────────────────────────────────────────── -->
+    @if (activeSection() === 'teachers') {
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Teachers Management</h1>
+          <p class="page-sub">{{ activeTeachers() }} active · {{ teachers.length }} total</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-primary">+ Add Teacher</button>
+        </div>
+      </div>
+
+      <div class="teachers-grid">
+        @for (teacher of teachers; track teacher.id) {
+          <div class="teacher-card">
+            <div class="teacher-card-top">
+              <div class="teacher-card-avatar">{{ teacher.avatar }}</div>
+              <span class="status-badge"
+                [class.badge-active]="teacher.status === 'active'"
+                [class.badge-inactive]="teacher.status === 'inactive'">
+                {{ teacher.status }}
+              </span>
+            </div>
+            <div class="teacher-card-body">
+              <h3 class="teacher-card-name">{{ teacher.name }}</h3>
+              <p class="teacher-card-subject">{{ teacher.subject }}</p>
+              <div class="teacher-card-stats">
+                <div class="tc-stat">
+                  <span class="tc-val">{{ teacher.students }}</span>
+                  <span class="tc-lbl">Students</span>
+                </div>
+                <div class="tc-stat">
+                  <span class="tc-val">{{ formatSalary(teacher.salary) }}</span>
+                  <span class="tc-lbl">Salary</span>
+                </div>
+              </div>
+              <p class="teacher-email">{{ teacher.email }}</p>
+            </div>
+            <div class="teacher-card-footer">
+              <button class="btn-outline-sm">View Profile</button>
+              <button class="btn-primary-sm">Edit</button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ── COURSES ─────────────────────────────────────────────────────── -->
+    @if (activeSection() === 'courses') {
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Courses Management</h1>
+          <p class="page-sub">Manage all active and upcoming courses</p>
+        </div>
+        <div class="header-actions">
+          <a routerLink="/courses" class="btn-secondary">View Public Page</a>
+          <button class="btn-primary">+ Add Course</button>
+        </div>
+      </div>
+      <div class="coming-soon">
+        <div class="cs-icon">📚</div>
+        <h3>Courses management coming soon</h3>
+        <p>Full course management with add, edit, delete will be built in the next module.</p>
+        <a routerLink="/courses" class="btn-primary-link">View Courses Page →</a>
+      </div>
+    }
+
+    <!-- ── FEES ───────────────────────────────────────────────────────── -->
+    @if (activeSection() === 'fees') {
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Fee Management</h1>
+          <p class="page-sub">{{ pendingFees() }} students have pending or overdue fees</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-primary">+ Record Payment</button>
+        </div>
+      </div>
+
+      <!-- Fee Summary -->
+      <div class="fee-summary-grid">
+        <div class="fee-sum-card fee-sum-green">
+          <div class="fs-icon">💚</div>
+          <div class="fs-val">{{ students.filter(s => s.fee === 'paid').length }}</div>
+          <div class="fs-lbl">Fees Paid</div>
+        </div>
+        <div class="fee-sum-card fee-sum-yellow">
+          <div class="fs-icon">⏳</div>
+          <div class="fs-val">{{ students.filter(s => s.fee === 'pending').length }}</div>
+          <div class="fs-lbl">Pending</div>
+        </div>
+        <div class="fee-sum-card fee-sum-red">
+          <div class="fs-icon">🚨</div>
+          <div class="fs-val">{{ students.filter(s => s.fee === 'overdue').length }}</div>
+          <div class="fs-lbl">Overdue</div>
+        </div>
+        <div class="fee-sum-card fee-sum-purple">
+          <div class="fs-icon">💰</div>
+          <div class="fs-val">Rs. 186,000</div>
+          <div class="fs-lbl">Total Collected</div>
+        </div>
+      </div>
+
+      <!-- Fee Table -->
+      <div class="table-card">
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Course</th>
+                <th>Fee Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (student of students; track student.id) {
+                <tr [class.row-overdue]="student.fee === 'overdue'">
+                  <td>
+                    <div class="student-cell">
+                      <div class="cell-avatar">{{ student.avatar }}</div>
+                      <div class="cell-info">
+                        <div class="cell-name">{{ student.name }}</div>
+                        <div class="cell-email">{{ student.email }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>{{ student.course }}</td>
+                  <td>
+                    <span class="fee-badge"
+                      [class.fee-paid]="student.fee === 'paid'"
+                      [class.fee-pending]="student.fee === 'pending'"
+                      [class.fee-overdue]="student.fee === 'overdue'">
+                      {{ student.fee }}
+                    </span>
+                  </td>
+                  <td>
+                    @if (student.fee !== 'paid') {
+                      <button class="btn-primary-sm">Mark Paid</button>
+                    } @else {
+                      <button class="btn-outline-sm">Receipt</button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    <!-- ── OTHER SECTIONS — Coming Soon ──────────────────────────────── -->
+    @if (activeSection() === 'attendance' ||
+         activeSection() === 'assignments' ||
+         activeSection() === 'notifications' ||
+         activeSection() === 'settings') {
+      <div class="page-header">
+        <h1 class="page-title">
+          {{ navItems.find(n => n.section === activeSection())?.label }}
+        </h1>
+      </div>
+      <div class="coming-soon">
+        <div class="cs-icon">🔧</div>
+        <h3>This section is coming soon</h3>
+        <p>We will build this module step by step in the next phases.</p>
+        <button class="btn-primary-link" (click)="setSection('dashboard')">
+          ← Back to Dashboard
+        </button>
+      </div>
+    }
+
+  </main>
+</div>

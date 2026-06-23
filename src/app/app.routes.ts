@@ -40,7 +40,7 @@ export const routes: Routes = [
   {
     path: 'admin',
     loadComponent: () =>
-      import('./features/admin/admin/admin').then(m => m.Admin)
+      import('./features/admin/admin/admin.component').then(m => m.AdminComponent)
   },
   {
     path: '**',
