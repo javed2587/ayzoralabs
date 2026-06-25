@@ -1,5 +1,6 @@
 import { Component, signal, computed } from '@angular/core';
-import { RouterLink, RouterLinkActive }  from '@angular/router';
+import { RouterLink }  from '@angular/router';
+
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type AdminSection =
@@ -57,7 +58,7 @@ interface RecentActivity {
 @Component({
   selector:    'app-admin',
   standalone:  true,
-  imports:     [RouterLink, RouterLinkActive],
+  imports:     [RouterLink],
   templateUrl: './admin.component.html',
   styleUrl:    './admin.component.css'
 })

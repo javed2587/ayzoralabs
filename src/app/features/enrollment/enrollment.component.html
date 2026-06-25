@@ -1,0 +1,40 @@
+<div class="enrollment-wrapper">
+
+  <!-- Page Header -->
+  <div class="enrollment-header">
+    <h1>Student Enrollment</h1>
+    <p>Fill the form below to register for your course at Ayzora Labs</p>
+  </div>
+
+  <!-- Loading indicator while iframe loads -->
+  <!-- TODO: Use @if to show this div only when isLoading() is true -->
+  <div class="loading-indicator">
+    <p>Loading enrollment form...</p>
+  </div>
+
+  <!-- Google Form Embedded -->
+  <div class="form-container">
+    <iframe
+      [src]="safeFormUrl"
+      width="100%"
+      height="900"
+      frameborder="0"
+      marginheight="0"
+      marginwidth="0"
+      (load)="onFormLoaded()">
+      <!-- TODO: Add a fallback text inside iframe for old browsers -->
+    </iframe>
+  </div>
+
+  <!-- WhatsApp backup -->
+  <div class="whatsapp-backup">
+    <p>Prefer WhatsApp? 
+      <!-- TODO: Replace 923001234567 with your real WhatsApp number -->
+      <a href="https://wa.me/923001234567?text=I want to enroll in a course" 
+         target="_blank">
+        Message us directly
+      </a>
+    </p>
+  </div>
+
+</div>

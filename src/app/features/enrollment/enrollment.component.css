@@ -1,0 +1,44 @@
+.enrollment-wrapper {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.enrollment-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.enrollment-header h1 {
+  /* TODO: Set font-size to 2rem and color to your brand color */
+  font-weight: 700;
+}
+
+.enrollment-header p {
+  color: #666;
+  font-size: 1rem;
+}
+
+.loading-indicator {
+  text-align: center;
+  padding: 2rem;
+  color: #888;
+}
+
+.form-container {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+}
+
+.whatsapp-backup {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.whatsapp-backup a {
+  /* TODO: Set color to #25D366 (WhatsApp green) and font-weight to 600 */
+  text-decoration: none;
+}

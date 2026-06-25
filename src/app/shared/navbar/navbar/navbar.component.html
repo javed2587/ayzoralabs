@@ -9,10 +9,11 @@
 
     <!-- Desktop Links -->
     <ul class="nav-links">
-      <li><a routerLink="/"        routerLinkActive="active-link" [routerLinkActiveOptions]="{exact:true}">Home</a></li>
-      <li><a routerLink="/courses" routerLinkActive="active-link">Courses</a></li>
-      <li><a routerLink="/about"   routerLinkActive="active-link">About</a></li>
-      <li><a routerLink="/contact" routerLinkActive="active-link">Contact</a></li>
+      <li><a routerLink="/"           routerLinkActive="active-link" [routerLinkActiveOptions]="{exact:true}">Home</a></li>
+      <li><a routerLink="/courses"    routerLinkActive="active-link">Courses</a></li>
+      <li><a routerLink="/about"      routerLinkActive="active-link">About</a></li>
+      <li><a routerLink="/contact"    routerLinkActive="active-link">Contact</a></li>
+      <li><a routerLink="/enrollment" routerLinkActive="active-link">Enroll Now</a></li>
     </ul>
 
     <!-- Desktop Auth Buttons -->
@@ -33,11 +34,13 @@
   <!-- Mobile Menu -->
   <div class="mobile-menu" [class.open]="menuOpen()">
     <ul>
-      <li><a routerLink="/"        routerLinkActive="active-link" [routerLinkActiveOptions]="{exact:true}" (click)="closeMenu()">Home</a></li>
-      <li><a routerLink="/courses" routerLinkActive="active-link" (click)="closeMenu()">Courses</a></li>
-      <li><a routerLink="/about"   routerLinkActive="active-link" (click)="closeMenu()">About</a></li>
-      <li><a routerLink="/contact" routerLinkActive="active-link" (click)="closeMenu()">Contact</a></li>
+      <li><a routerLink="/"           routerLinkActive="active-link" [routerLinkActiveOptions]="{exact:true}" (click)="closeMenu()">Home</a></li>
+      <li><a routerLink="/courses"    routerLinkActive="active-link" (click)="closeMenu()">Courses</a></li>
+      <li><a routerLink="/about"      routerLinkActive="active-link" (click)="closeMenu()">About</a></li>
+      <li><a routerLink="/contact"    routerLinkActive="active-link" (click)="closeMenu()">Contact</a></li>
+      <li><a routerLink="/enrollment" routerLinkActive="active-link" (click)="closeMenu()">Enroll Now</a></li>
     </ul>
+
     <div class="mobile-auth">
       <a routerLink="/login"    class="btn-login"  (click)="closeMenu()">Login</a>
       <a routerLink="/register" class="btn-signup" (click)="closeMenu()">Get Started</a>

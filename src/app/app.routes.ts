@@ -43,6 +43,12 @@ export const routes: Routes = [
       import('./features/admin/admin/admin.component').then(m => m.AdminComponent)
   },
   {
+  path: 'enrollment',
+  loadComponent: () =>
+    import('./features/enrollment/enrollment.component')
+      .then(m => m.EnrollmentComponent)
+},
+  {
     path: '**',
     redirectTo: ''   // redirect unknown URLs to home
   }
