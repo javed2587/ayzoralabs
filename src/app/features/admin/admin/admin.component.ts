@@ -138,8 +138,20 @@ export class AdminComponent {
     { id: 5,  name: 'Zain Malik',    email: 'zain@gmail.com',   course: 'Python for Kids',      status: 'active',   joined: 'Dec 2024', avatar: 'ZM', fee: 'paid'    },
     { id: 6,  name: 'Hira Tariq',    email: 'hira@gmail.com',   course: 'Web Design',           status: 'active',   joined: 'Jan 2025', avatar: 'HT', fee: 'pending' },
     { id: 7,  name: 'Bilal Qureshi', email: 'bilal@gmail.com',  course: 'AI Tools Masterclass', status: 'active',   joined: 'Jan 2025', avatar: 'BQ', fee: 'paid'    },
-    { id: 8,  name: 'Nadia Awan',    email: 'nadia@gmail.com',  course: 'Scratch Coding',       status: 'inactive', joined: 'Jul 2024', avatar: 'NA', fee: 'overdue' },
-     { id: 9,  name: 'Ayzal Javed',    email: 'ayzalia@gmail.com',  course: 'Scratch Coding',       status: 'inactive', joined: 'Jul 2024', avatar: 'NA', fee: 'overdue' }
+    { id: 8,  name: 'M.Talha',    email: 'nadia@gmail.com',  course: 'Scratch jr',       status: 'inactive', joined: 'Jul 2024', avatar: 'NA', fee: 'overdue' },
+     { id: 9,  name: 'Hijab Fatima',    email: 'ayzalia@gmail.com',  course: 'Video Editing',       status: 'inactive', joined: 'Jul 2024', avatar: 'NA', fee: 'overdue' },
+
+
+
+      { id: 11,  name: 'Zoaib Khan',    email: 'ali@gmail.com',    course: 'Scratch jr ',      status: 'active',   joined: 'Sep 2024', avatar: 'AH', fee: 'paid'    },
+    { id: 22,  name: 'Umer ',    email: 'sara@gmail.com',   course: 'Programing ', status: 'active',   joined: 'Oct 2024', avatar: 'SA', fee: 'pending' },
+    { id: 33,  name: 'Arman',    email: 'omar@gmail.com',   course: 'Python',       status: 'active',   joined: 'Nov 2024', avatar: 'OB', fee: 'paid'    },
+    { id: 44,  name: 'Musa',   email: 'fatima@gmail.com', course: 'Scratch jr ',      status: 'inactive', joined: 'Aug 2024', avatar: 'FK', fee: 'overdue' },
+    { id: 55,  name: 'Samuael ',    email: 'zain@gmail.com',   course: 'Coloring',      status: 'active',   joined: 'Dec 2024', avatar: 'ZM', fee: 'paid'    },
+    { id: 66,  name: 'Areeba',    email: 'hira@gmail.com',   course: 'Programming',           status: 'active',   joined: 'Jan 2025', avatar: 'HT', fee: 'pending' },
+    { id: 77,  name: 'Arman', email: 'bilal@gmail.com',  course: 'Python', status: 'active',   joined: 'Jan 2025', avatar: 'BQ', fee: 'paid'    },
+    { id: 88,  name: 'Abeeha',    email: 'nadia@gmail.com',  course: 'Canva',       status: 'inactive', joined: 'Jul 2024', avatar: 'NA', fee: 'overdue' },
+     { id: 99,  name: 'M. Ahmad',    email: 'ayzalia@gmail.com',  course: 'Scrach 3.0',       status: 'inactive', joined: 'Jul 2024', avatar: 'NA', fee: 'overdue' }
   ];
 
   // ── Teachers Mock Data ────────────────────────────────────────────────────

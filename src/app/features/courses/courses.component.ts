@@ -157,6 +157,23 @@ export class CoursesComponent {
       color: 'color-red',
       icon: '🕹️',
       imageUrl: ''
+    },
+    {
+      id: 9,
+      title: 'Unity Game Development.......2',
+      description: 'Build 2D and 3D games with Unity engine. Learn C# scripting and game physics.',
+      teacherName: 'Sir Bilal',
+      teacherAvatar: 'SB',
+      duration: '4 months',
+      sessions: 32,
+      level: 'Intermediate',
+      category: 'Game Dev',
+      price: 7000,
+      rating: 4.6,
+      students: 280,
+      color: 'color-red',
+      icon: '🕹️',
+      imageUrl: ''
     }
   ];
   // computed() automatically recalculates when activeCategory or searchQuery changes
