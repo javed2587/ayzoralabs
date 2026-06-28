@@ -48,6 +48,12 @@ export const routes: Routes = [
     import('./features/enrollment/enrollment.component')
       .then(m => m.EnrollmentComponent)
 },
+{
+  path: 'teacher',
+  loadComponent: () =>
+    import('./features/teacher/teacher.component')
+      .then(m => m.TeacherComponent)
+},
   {
     path: '**',
     redirectTo: ''   // redirect unknown URLs to home
