@@ -1,0 +1,414 @@
+<div class="teacher-wrapper">
+
+  <!-- ══ LIST VIEW ════════════════════════════════════════════════════════ -->
+  @if (activeView() === 'list') {
+
+    <!-- Header -->
+    <div class="page-header">
+      <div class="header-left">
+        <h1 class="page-title">👨‍🏫 Teacher Management</h1>
+        <p class="page-sub">
+          {{ teachers.length }} teachers ·
+          {{ teachers.filter(t => t.status === 'active').length }} active
+        </p>
+      </div>
+      <button class="btn-primary">+ Add Teacher</button>
+    </div>
+
+    <!-- Search -->
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search by name, subject or email..."
+        (input)="onSearch($event)"
+      />
+    </div>
+
+    <!-- Teacher Cards Grid -->
+    <div class="teacher-grid">
+      @for (teacher of filteredTeachers(); track teacher.id) {
+        <div class="teacher-card" (click)="selectTeacher(teacher)">
+
+          <!-- Card Top -->
+          <div class="card-top">
+            <div class="card-avatar">{{ teacher.avatar }}</div>
+            <span class="status-pill"
+              [class.pill-active]="teacher.status === 'active'"
+              [class.pill-inactive]="teacher.status === 'inactive'">
+              {{ teacher.status }}
+            </span>
+          </div>
+
+          <!-- Card Body -->
+          <div class="card-body">
+            <h3 class="card-name">{{ teacher.name }}</h3>
+            <p class="card-subject">{{ teacher.subject }}</p>
+
+            <!-- Rating -->
+            <div class="card-rating">
+              <span class="stars">{{ getStars(teacher.rating) }}</span>
+              <span class="rating-val">{{ teacher.rating }}</span>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="card-stats">
+              <div class="cs-item">
+                <span class="cs-val">{{ teacher.students }}</span>
+                <span class="cs-lbl">Students</span>
+              </div>
+              <div class="cs-item">
+                <span class="cs-val">{{ teacher.experience }}</span>
+                <span class="cs-lbl">Experience</span>
+              </div>
+              <div class="cs-item">
+                <span class="cs-val">{{ formatAmount(teacher.salary) }}</span>
+                <span class="cs-lbl">Salary</span>
+              </div>
+            </div>
+
+            <!-- Courses -->
+            <div class="card-courses">
+              @for (course of teacher.courses; track course) {
+                <span class="course-tag">{{ course }}</span>
+              }
+            </div>
+          </div>
+
+          <!-- Card Footer -->
+          <div class="card-footer">
+            <span class="view-profile-hint">Click to view full profile →</span>
+          </div>
+
+        </div>
+      }
+    </div>
+
+    <!-- No results -->
+    @if (filteredTeachers().length === 0) {
+      <div class="no-results">
+        <div class="no-results-icon">🔍</div>
+        <h3>No teachers found</h3>
+        <p>Try a different search term.</p>
+      </div>
+    }
+  }
+
+  <!-- ══ PROFILE VIEW ══════════════════════════════════════════════════════ -->
+  @if (activeView() === 'profile' && selectedTeacher()) {
+
+    <!-- Back Button -->
+    <div class="back-bar">
+      <button class="btn-back" (click)="goBack()">← Back to Teachers</button>
+    </div>
+
+    <!-- Profile Hero -->
+    <div class="profile-hero">
+      <div class="profile-hero-left">
+        <div class="profile-avatar-lg">{{ selectedTeacher()!.avatar }}</div>
+        <div class="profile-hero-info">
+          <div class="profile-status-row">
+            <span class="status-pill"
+              [class.pill-active]="selectedTeacher()!.status === 'active'"
+              [class.pill-inactive]="selectedTeacher()!.status === 'inactive'">
+              {{ selectedTeacher()!.status }}
+            </span>
+            <span class="joined-text">
+              Joined {{ selectedTeacher()!.joinedDate }}
+            </span>
+          </div>
+          <h1 class="profile-name">{{ selectedTeacher()!.name }}</h1>
+          <p class="profile-subject">{{ selectedTeacher()!.subject }}</p>
+          <div class="profile-rating">
+            <span class="stars">{{ getStars(selectedTeacher()!.rating) }}</span>
+            <span class="rating-val">{{ selectedTeacher()!.rating }} / 5.0</span>
+          </div>
+          <div class="profile-contact">
+            <span class="contact-item">✉️ {{ selectedTeacher()!.email }}</span>
+            <span class="contact-item">📱 {{ selectedTeacher()!.phone }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="profile-quick-stats">
+        <div class="pqs-item">
+          <div class="pqs-val">{{ selectedTeacher()!.students }}</div>
+          <div class="pqs-lbl">Students</div>
+        </div>
+        <div class="pqs-item">
+          <div class="pqs-val">{{ selectedTeacher()!.completedClasses }}</div>
+          <div class="pqs-lbl">Classes Done</div>
+        </div>
+        <div class="pqs-item">
+          <div class="pqs-val">{{ attendancePercent() }}%</div>
+          <div class="pqs-lbl">Attendance</div>
+        </div>
+        <div class="pqs-item">
+          <div class="pqs-val">{{ formatAmount(selectedTeacher()!.salary) }}</div>
+          <div class="pqs-lbl">Monthly</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+      <button class="tab-btn" [class.tab-active]="activeTab() === 'overview'"   (click)="setTab('overview')">Overview</button>
+      <button class="tab-btn" [class.tab-active]="activeTab() === 'schedule'"   (click)="setTab('schedule')">Schedule</button>
+      <button class="tab-btn" [class.tab-active]="activeTab() === 'salary'"     (click)="setTab('salary')">Salary</button>
+      <button class="tab-btn" [class.tab-active]="activeTab() === 'attendance'" (click)="setTab('attendance')">Attendance</button>
+    </div>
+
+    <!-- ── OVERVIEW TAB ── -->
+    @if (activeTab() === 'overview') {
+      <div class="tab-content">
+        <div class="content-grid">
+
+          <!-- About -->
+          <div class="info-card full-width">
+            <h2 class="info-card-title">About</h2>
+            <p class="bio-text">{{ selectedTeacher()!.bio }}</p>
+          </div>
+
+          <!-- Details -->
+          <div class="info-card">
+            <h2 class="info-card-title">Details</h2>
+            <div class="detail-list">
+              <div class="detail-row">
+                <span class="detail-label">📚 Qualification</span>
+                <span class="detail-val">{{ selectedTeacher()!.qualification }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">💼 Experience</span>
+                <span class="detail-val">{{ selectedTeacher()!.experience }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">👥 Total Students</span>
+                <span class="detail-val">{{ selectedTeacher()!.students }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">📅 Total Classes</span>
+                <span class="detail-val">{{ selectedTeacher()!.totalClasses }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">✅ Completed</span>
+                <span class="detail-val">{{ selectedTeacher()!.completedClasses }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">📧 Email</span>
+                <span class="detail-val">{{ selectedTeacher()!.email }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">📱 Phone</span>
+                <span class="detail-val">{{ selectedTeacher()!.phone }}</span>
+              </div>
+                <div class="detail-row">
+                <span class="detail-label">📱 City</span>
+                <span class="detail-val">{{ selectedTeacher()!.city }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Courses Teaching -->
+          <div class="info-card">
+            <h2 class="info-card-title">Courses Teaching</h2>
+            <div class="courses-list">
+              @for (course of selectedTeacher()!.courses; track course) {
+                <div class="course-item">
+                  <span class="course-dot">📚</span>
+                  <span class="course-name">{{ course }}</span>
+                </div>
+              }
+            </div>
+
+            <!-- Class Progress -->
+            <div class="progress-section">
+              <div class="progress-label-row">
+                <span class="progress-label">Classes Completed</span>
+                <span class="progress-pct">
+                  {{ selectedTeacher()!.completedClasses }}/{{ selectedTeacher()!.totalClasses }}
+                </span>
+              </div>
+              <div class="progress-bar-outer">
+                <div class="progress-bar-inner"
+                  [style.width.%]="(selectedTeacher()!.completedClasses / selectedTeacher()!.totalClasses) * 100">
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    }
+
+    <!-- ── SCHEDULE TAB ── -->
+    @if (activeTab() === 'schedule') {
+      <div class="tab-content">
+        <div class="info-card">
+          <h2 class="info-card-title">
+            Weekly Class Schedule
+            <span class="title-badge">{{ currentSchedule().length }} classes/week</span>
+          </h2>
+
+          @if (currentSchedule().length === 0) {
+            <div class="empty-state">
+              <div class="empty-icon">📅</div>
+              <p>No classes scheduled for this teacher.</p>
+            </div>
+          }
+
+          <div class="schedule-list">
+            @for (cls of currentSchedule(); track cls.id) {
+              <div class="schedule-item">
+                <div class="schedule-icon">{{ cls.icon }}</div>
+                <div class="schedule-info">
+                  <div class="schedule-course">{{ cls.course }}</div>
+                  <div class="schedule-meta">
+                    📅 {{ cls.day }} · ⏰ {{ cls.time }}
+                  </div>
+                </div>
+                <div class="schedule-right">
+                  <div class="schedule-students">👥 {{ cls.students }}</div>
+                  <div class="schedule-platform">{{ cls.platform }}</div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ── SALARY TAB ── -->
+    @if (activeTab() === 'salary') {
+      <div class="tab-content">
+
+        <!-- Salary Summary Cards -->
+        <div class="salary-summary">
+          <div class="salary-card salary-current">
+            <div class="sc-icon">💰</div>
+            <div class="sc-val">{{ formatAmount(selectedTeacher()!.salary) }}</div>
+            <div class="sc-lbl">Current Monthly</div>
+          </div>
+          <div class="salary-card salary-paid">
+            <div class="sc-icon">✅</div>
+            <div class="sc-val">{{ formatAmount(totalSalaryPaid()) }}</div>
+            <div class="sc-lbl">Total Paid (This Year)</div>
+          </div>
+          <div class="salary-card salary-pending">
+            <div class="sc-icon">⏳</div>
+            <div class="sc-val">{{ formatAmount(pendingSalary()) }}</div>
+            <div class="sc-lbl">Pending Amount</div>
+          </div>
+        </div>
+
+        <!-- Salary Records Table -->
+        <div class="info-card">
+          <h2 class="info-card-title">Salary History</h2>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Month</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Paid On</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (record of currentSalary(); track record.month) {
+                  <tr>
+                    <td class="month-cell">{{ record.month }}</td>
+                    <td class="amount-cell">{{ formatAmount(record.amount) }}</td>
+                    <td>
+                      <span class="salary-status"
+                        [class.status-paid]="record.status === 'paid'"
+                        [class.status-pending]="record.status === 'pending'">
+                        {{ record.status }}
+                      </span>
+                    </td>
+                    <td class="date-cell">{{ record.paidOn || '—' }}</td>
+                    <td>
+                      @if (record.status === 'pending') {
+                        <button class="btn-pay">Pay Now</button>
+                      } @else {
+                        <button class="btn-receipt">Receipt</button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ── ATTENDANCE TAB ── -->
+    @if (activeTab() === 'attendance') {
+      <div class="tab-content">
+
+        <!-- Attendance Overview -->
+        <div class="att-overview">
+          <div class="att-overview-card">
+            <div class="ao-icon">✅</div>
+            <div class="ao-val">{{ attendancePercent() }}%</div>
+            <div class="ao-lbl">Overall Attendance</div>
+          </div>
+          <div class="att-overview-card">
+            <div class="ao-icon">📅</div>
+            <div class="ao-val">
+              {{ currentAttendance().reduce((s,r) => s + r.present, 0) }}
+            </div>
+            <div class="ao-lbl">Total Present</div>
+          </div>
+          <div class="att-overview-card">
+            <div class="ao-icon">❌</div>
+            <div class="ao-val">
+              {{ currentAttendance().reduce((s,r) => s + r.absent, 0) }}
+            </div>
+            <div class="ao-lbl">Total Absent</div>
+          </div>
+        </div>
+
+        <!-- Monthly Breakdown -->
+        <div class="info-card">
+          <h2 class="info-card-title">Monthly Breakdown</h2>
+
+          @if (currentAttendance().length === 0) {
+            <div class="empty-state">
+              <div class="empty-icon">📅</div>
+              <p>No attendance records available.</p>
+            </div>
+          }
+
+          <div class="att-list">
+            @for (record of currentAttendance(); track record.month) {
+              <div class="att-item">
+                <div class="att-month">{{ record.month }}</div>
+                <div class="att-bar-wrap">
+                  <div class="att-bar"
+                    [style.width.%]="getAttendancePct(record)"
+                    [class.bar-good]="getAttendancePct(record) >= 90"
+                    [class.bar-ok]="getAttendancePct(record) >= 75 && getAttendancePct(record) < 90"
+                    [class.bar-low]="getAttendancePct(record) < 75">
+                  </div>
+                </div>
+                <div class="att-numbers">
+                  <span class="att-pct">{{ getAttendancePct(record) }}%</span>
+                  <span class="att-detail">
+                    {{ record.present }}/{{ record.total }} classes
+                  </span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+      </div>
+    }
+
+  }
+
+</div>
