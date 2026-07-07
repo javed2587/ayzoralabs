@@ -1,0 +1,529 @@
+<div class="fee-wrapper">
+
+  <!-- ══ PAGE HEADER ════════════════════════════════════════════════════ -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">💰 Fee Management</h1>
+      <p class="page-sub">
+        {{ selectedMonth() }} ·
+        {{ paidCount() }} paid ·
+        {{ unpaidCount() }} unpaid ·
+        {{ overdueCount() }} overdue
+      </p>
+    </div>
+    <div class="header-actions">
+      <button
+        class="btn-tab"
+        [class.btn-tab-active]="activeView() === 'list'"
+        (click)="setView('list')">
+        📋 Fee List
+      </button>
+      <button
+        class="btn-tab"
+        [class.btn-tab-active]="activeView() === 'history'"
+        (click)="setView('history')">
+        📊 Monthly Summary
+      </button>
+      <button
+        class="btn-primary"
+        (click)="setView('add-payment')">
+        + Record Payment
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ SUMMARY CARDS ═════════════════════════════════════════════════ -->
+  <div class="summary-grid">
+
+    <div class="summary-card summary-blue">
+      <div class="sc-top">
+        <span class="sc-icon">💳</span>
+        <span class="sc-trend trend-up">↑ {{ collectionRate() }}%</span>
+      </div>
+      <div class="sc-value">{{ formatAmount(totalBilled()) }}</div>
+      <div class="sc-label">Total Billed</div>
+      <div class="sc-sub">{{ feeRecords.length }} students this month</div>
+    </div>
+
+    <div class="summary-card summary-green">
+      <div class="sc-top">
+        <span class="sc-icon">✅</span>
+        <span class="sc-count green-text">{{ paidCount() }} students</span>
+      </div>
+      <div class="sc-value">{{ formatAmount(totalCollected()) }}</div>
+      <div class="sc-label">Collected</div>
+      <div class="sc-sub">{{ collectionRate() }}% collection rate</div>
+    </div>
+
+    <div class="summary-card summary-yellow">
+      <div class="sc-top">
+        <span class="sc-icon">⏳</span>
+        <span class="sc-count yellow-text">{{ unpaidCount() }} students</span>
+      </div>
+      <div class="sc-value">{{ formatAmount(totalPending()) }}</div>
+      <div class="sc-label">Pending</div>
+      <div class="sc-sub">Due this month</div>
+    </div>
+
+    <div class="summary-card summary-red">
+      <div class="sc-top">
+        <span class="sc-icon">🚨</span>
+        <span class="sc-count red-text">{{ overdueCount() }} students</span>
+      </div>
+      <div class="sc-value">{{ formatAmount(totalOverdue()) }}</div>
+      <div class="sc-label">Overdue</div>
+      <div class="sc-sub">Needs immediate follow-up</div>
+    </div>
+
+  </div>
+
+  <!-- ══ FEE LIST VIEW ═════════════════════════════════════════════════ -->
+  @if (activeView() === 'list') {
+
+    <!-- Search + Filter Bar -->
+    <div class="controls-bar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search by student name or course..."
+          (input)="onSearch($event)"
+        />
+      </div>
+      <div class="filter-tabs">
+        @for (f of [
+          { value: 'all',     label: 'All',     count: feeRecords.length },
+          { value: 'paid',    label: 'Paid',    count: paidCount()       },
+          { value: 'unpaid',  label: 'Unpaid',  count: unpaidCount()     },
+          { value: 'overdue', label: 'Overdue', count: overdueCount()    }
+        ]; track f.value) {
+          <button
+            class="filter-tab"
+            [class.filter-active]="activeFilter() === f.value"
+            (click)="setFilter(f.value === 'all' ? 'all' :
+                               f.value === 'paid' ? 'paid' :
+                               f.value === 'unpaid' ? 'unpaid' : 'overdue')">
+            {{ f.label }}
+            <span class="tab-count">{{ f.count }}</span>
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Fee Records Table -->
+    <div class="table-card">
+      <div class="table-wrap">
+        <table class="fee-table">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Course</th>
+              <th>Monthly Fee</th>
+              <th>Due Date</th>
+              <th>Status</th>
+              <th>Payment Info</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (record of filteredRecords(); track record.id) {
+              <tr [class.row-overdue]="record.status === 'overdue'"
+                  [class.row-unpaid]="record.status === 'unpaid'">
+
+                <!-- Student -->
+                <td>
+                  <div class="student-cell">
+                    <div class="cell-avatar">{{ record.studentAvatar }}</div>
+                    <div class="cell-name">{{ record.studentName }}</div>
+                  </div>
+                </td>
+
+                <!-- Course -->
+                <td class="course-cell">{{ record.course }}</td>
+
+                <!-- Fee -->
+                <td class="amount-cell">{{ formatAmount(record.monthlyFee) }}</td>
+
+                <!-- Due Date -->
+                <td class="date-cell">{{ record.dueDate }}</td>
+
+                <!-- Status Badge -->
+                <td>
+                  <span class="status-badge"
+                    [class.badge-paid]="record.status === 'paid'"
+                    [class.badge-unpaid]="record.status === 'unpaid'"
+                    [class.badge-overdue]="record.status === 'overdue'">
+                    @if (record.status === 'paid')    { ✅ Paid    }
+                    @if (record.status === 'unpaid')  { ⏳ Unpaid  }
+                    @if (record.status === 'overdue') { 🚨 Overdue }
+                  </span>
+                </td>
+
+                <!-- Payment Info -->
+                <td>
+                  @if (record.status === 'paid') {
+                    <div class="payment-info">
+                      <span class="pay-method">
+                        {{ getMethodIcon(record.method) }} {{ record.method }}
+                      </span>
+                      <span class="pay-date">{{ record.paidOn }}</span>
+                    </div>
+                  } @else {
+                    @if (record.notes) {
+                      <span class="pay-note">📝 {{ record.notes }}</span>
+                    } @else {
+                      <span class="no-payment">—</span>
+                    }
+                  }
+                </td>
+
+                <!-- Action -->
+                <td>
+                  @if (record.status !== 'paid') {
+                    <button
+                      class="btn-mark-paid"
+                      (click)="markAsPaid(record)">
+                      Mark Paid
+                    </button>
+                  } @else {
+                    <button class="btn-receipt">
+                      🧾 Receipt
+                    </button>
+                  }
+                </td>
+
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      @if (filteredRecords().length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">💰</div>
+          <h3>No records found</h3>
+          <p>Try changing the filter or search term.</p>
+        </div>
+      }
+
+    </div>
+  }
+
+  <!-- ══ ADD PAYMENT VIEW ══════════════════════════════════════════════ -->
+  @if (activeView() === 'add-payment') {
+
+    <div class="form-layout">
+
+      <!-- Payment Form Card -->
+      <div class="form-card">
+        <div class="form-card-header">
+          <h2 class="form-card-title">💳 Record New Payment</h2>
+          <p class="form-card-sub">Enter payment details for a student</p>
+        </div>
+
+        <!-- Success Message -->
+        @if (submitSuccess()) {
+          <div class="success-alert">
+            ✅ Payment recorded successfully!
+          </div>
+        }
+
+        <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()" novalidate>
+
+          <div class="form-grid">
+
+            <!-- Student Name -->
+            <div class="form-group">
+              <label class="form-label">
+                Student Name <span class="required">*</span>
+              </label>
+              <div class="input-wrap">
+                <span class="input-icon">👨‍🎓</span>
+                <select
+                  formControlName="studentName"
+                  class="form-input form-select"
+                  [class.input-error]="studentName?.invalid && studentName?.touched">
+                  <option value="">Select student</option>
+                  @for (name of studentNames; track name) {
+                    <option [value]="name">{{ name }}</option>
+                  }
+                </select>
+              </div>
+              @if (studentName?.invalid && studentName?.touched) {
+                <div class="error-msg">Please select a student.</div>
+              }
+            </div>
+
+            <!-- Course -->
+            <div class="form-group">
+              <label class="form-label">
+                Course <span class="required">*</span>
+              </label>
+              <div class="input-wrap">
+                <span class="input-icon">📚</span>
+                <select
+                  formControlName="course"
+                  class="form-input form-select"
+                  [class.input-error]="course?.invalid && course?.touched">
+                  <option value="">Select course</option>
+                  @for (c of [
+                    'Python for Kids',
+                    'AI Tools Masterclass',
+                    'Scratch Coding',
+                    'Roblox Game Dev',
+                    'Web Design',
+                    'Unity Game Dev'
+                  ]; track c) {
+                    <option [value]="c">{{ c }}</option>
+                  }
+                </select>
+              </div>
+              @if (course?.invalid && course?.touched) {
+                <div class="error-msg">Please select a course.</div>
+              }
+            </div>
+
+            <!-- Amount -->
+            <div class="form-group">
+              <label class="form-label">
+                Amount (Rs.) <span class="required">*</span>
+              </label>
+              <div class="input-wrap">
+                <span class="input-icon">💵</span>
+                <input
+                  type="number"
+                  formControlName="amount"
+                  class="form-input"
+                  [class.input-error]="amount?.invalid && amount?.touched"
+                  placeholder="e.g. 4500"
+                />
+              </div>
+              @if (amount?.invalid && amount?.touched) {
+                <div class="error-msg">
+                  @if (amount?.errors?.['required']) { Amount is required. }
+                  @if (amount?.errors?.['min'])      { Amount must be at least Rs. 100. }
+                </div>
+              }
+            </div>
+
+            <!-- Month -->
+            <div class="form-group">
+              <label class="form-label">
+                For Month <span class="required">*</span>
+              </label>
+              <div class="input-wrap">
+                <span class="input-icon">📅</span>
+                <select
+                  formControlName="month"
+                  class="form-input form-select"
+                  [class.input-error]="month?.invalid && month?.touched">
+                  @for (m of months; track m) {
+                    <option [value]="m">{{ m }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="form-group">
+              <label class="form-label">
+                Payment Method <span class="required">*</span>
+              </label>
+              <div class="method-options">
+                @for (pm of paymentMethods; track pm.value) {
+                  <label class="method-option"
+                    [class.method-selected]="paymentForm.get('method')?.value === pm.value">
+                    <input
+                      type="radio"
+                      formControlName="method"
+                      [value]="pm.value"
+                    />
+                    <span class="method-icon">{{ pm.icon }}</span>
+                    <span class="method-label">{{ pm.label }}</span>
+                  </label>
+                }
+              </div>
+            </div>
+
+            <!-- Payment Date -->
+            <div class="form-group">
+              <label class="form-label">
+                Payment Date <span class="required">*</span>
+              </label>
+              <div class="input-wrap">
+                <span class="input-icon">📅</span>
+                <input
+                  type="date"
+                  formControlName="paidOn"
+                  class="form-input"
+                  [class.input-error]="paidOn?.invalid && paidOn?.touched"
+                />
+              </div>
+              @if (paidOn?.invalid && paidOn?.touched) {
+                <div class="error-msg">Please enter the payment date.</div>
+              }
+            </div>
+
+            <!-- Notes -->
+            <div class="form-group full-width">
+              <label class="form-label">Notes (Optional)</label>
+              <div class="input-wrap">
+                <textarea
+                  formControlName="notes"
+                  class="form-input form-textarea"
+                  placeholder="Any additional notes about this payment..."
+                  rows="3">
+                </textarea>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Form Buttons -->
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn-secondary"
+              (click)="setView('list')">
+              ← Cancel
+            </button>
+            <button
+              type="submit"
+              class="btn-submit"
+              [disabled]="isLoading()">
+              @if (isLoading()) {
+                <span class="spinner"></span> Recording...
+              } @else {
+                💰 Record Payment
+              }
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- Help Sidebar -->
+      <div class="form-sidebar">
+        <div class="help-card">
+          <h3 class="help-title">💡 Quick Tips</h3>
+          <ul class="help-list">
+            <li>Select the correct student and course before entering amount</li>
+            <li>Always enter the exact date when payment was received</li>
+            <li>Add notes for partial payments or special cases</li>
+            <li>EasyPaisa and JazzCash — keep screenshot for records</li>
+          
+          </ul>
+        </div>
+
+        <div class="fee-reference">
+          <h3 class="ref-title">📋 Course Fees</h3>
+          @for (item of [
+            { course: 'Python for Kids',      fee: 4500 },
+            { course: 'AI Tools Masterclass', fee: 3500 },
+            { course: 'Scratch Coding',       fee: 2500 },
+            { course: 'Roblox Game Dev',      fee: 5000 },
+            { course: 'Web Design',           fee: 4000 },
+            { course: 'Unity Game Dev',       fee: 7000 }
+          ]; track item.course) {
+            <div class="ref-row">
+              <span class="ref-course">{{ item.course }}</span>
+              <span class="ref-fee">{{ formatAmount(item.fee) }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+    </div>
+  }
+
+  <!-- ══ MONTHLY HISTORY VIEW ══════════════════════════════════════════ -->
+  @if (activeView() === 'history') {
+
+    <div class="history-section">
+      <div class="history-header">
+        <h2 class="history-title">📊 Monthly Collection Summary</h2>
+        <p class="history-sub">Track fee collection trends across months</p>
+      </div>
+
+      <!-- Monthly Cards -->
+      <div class="history-list">
+        @for (stat of monthlyStats; track stat.month) {
+          <div class="history-card">
+
+            <div class="hc-top">
+              <div class="hc-month">{{ stat.month }}</div>
+              <div class="hc-students">{{ stat.count }} students</div>
+            </div>
+
+            <!-- Collection Progress Bar -->
+            <div class="hc-progress-wrap">
+              <div class="hc-progress-bar"
+                [style.width.%]="getCollectionPercent(stat)"
+                [class.prog-full]="getCollectionPercent(stat) === 100"
+                [class.prog-high]="getCollectionPercent(stat) >= 80 && getCollectionPercent(stat) < 100"
+                [class.prog-low]="getCollectionPercent(stat) < 80">
+              </div>
+            </div>
+
+            <div class="hc-stats">
+              <div class="hc-stat">
+                <span class="hcs-val green-text">
+                  {{ formatAmount(stat.collected) }}
+                </span>
+                <span class="hcs-lbl">Collected</span>
+              </div>
+              <div class="hc-stat">
+                <span class="hcs-val yellow-text">
+                  {{ formatAmount(stat.pending) }}
+                </span>
+                <span class="hcs-lbl">Pending</span>
+              </div>
+              <div class="hc-stat">
+                <span class="hcs-val red-text">
+                  {{ formatAmount(stat.overdue) }}
+                </span>
+                <span class="hcs-lbl">Overdue</span>
+              </div>
+              <div class="hc-stat">
+                <span class="hcs-val purple-text">
+                  {{ getCollectionPercent(stat) }}%
+                </span>
+                <span class="hcs-lbl">Rate</span>
+              </div>
+            </div>
+
+          </div>
+        }
+      </div>
+
+      <!-- Total Summary -->
+      <div class="total-summary">
+        <h3 class="total-title">6 Month Totals</h3>
+        <div class="total-grid">
+          <div class="total-item">
+            <span class="total-val">
+              {{ formatAmount(monthlyStats.reduce((s,m) => s + m.totalBilled, 0)) }}
+            </span>
+            <span class="total-lbl">Total Billed</span>
+          </div>
+          <div class="total-item">
+            <span class="total-val green-text">
+              {{ formatAmount(monthlyStats.reduce((s,m) => s + m.collected, 0)) }}
+            </span>
+            <span class="total-lbl">Total Collected</span>
+          </div>
+          <div class="total-item">
+            <span class="total-val red-text">
+              {{ formatAmount(monthlyStats.reduce((s,m) => s + m.overdue, 0)) }}
+            </span>
+            <span class="total-lbl">Total Overdue</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  }
+
+</div>

@@ -54,6 +54,12 @@ export const routes: Routes = [
     import('./features/teacher/teacher.component')
       .then(m => m.TeacherComponent)
 },
+{
+path: 'fees',
+loadComponent: () => 
+  import('./features/fee/fee.component')
+.then(m => m.FeeComponent)
+},
   {
     path: '**',
     redirectTo: ''   // redirect unknown URLs to home
