@@ -60,6 +60,12 @@ loadComponent: () =>
   import('./features/fee/fee.component')
 .then(m => m.FeeComponent)
 },
+{
+  path: 'attendance',
+  loadComponent: () =>
+    import('./features/attendance/attendance.component')
+      .then(m => m.AttendanceComponent)
+},
   {
     path: '**',
     redirectTo: ''   // redirect unknown URLs to home

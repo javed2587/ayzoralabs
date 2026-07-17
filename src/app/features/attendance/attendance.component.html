@@ -1,0 +1,476 @@
+<div class="attendance-wrapper">
+
+  <!-- ══ PAGE HEADER ════════════════════════════════════════════════════ -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">✅ Attendance Tracker</h1>
+      <p class="page-sub">
+        Mark and monitor attendance for all classes
+      </p>
+    </div>
+    <div class="header-actions">
+      <button
+        class="view-btn"
+        [class.view-active]="activeView() === 'mark'"
+        (click)="setView('mark')">
+        ✏️ Mark Attendance
+      </button>
+      <button
+        class="view-btn"
+        [class.view-active]="activeView() === 'history'"
+        (click)="setView('history')">
+        📋 History
+      </button>
+      <button
+        class="view-btn"
+        [class.view-active]="activeView() === 'report'"
+        (click)="setView('report')">
+        📊 Monthly Report
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ OVERALL STATS ══════════════════════════════════════════════════ -->
+  <div class="overall-stats">
+    <div class="os-card os-purple">
+      <span class="os-icon">🏫</span>
+      <div class="os-body">
+        <div class="os-val">{{ classes.length }}</div>
+        <div class="os-lbl">Total Classes</div>
+      </div>
+    </div>
+<div class="os-card os-blue">
+  <span class="os-icon">👨‍🎓</span>
+  <div class="os-body">
+    <div class="os-val">{{ getTotalStudents() }}</div>
+    <div class="os-lbl">Total Students</div>
+  </div>
+</div>
+    <div class="os-card os-green">
+      <span class="os-icon">✅</span>
+      <div class="os-body">
+        <div class="os-val">{{ overallPercent() }}%</div>
+        <div class="os-lbl">Overall Attendance</div>
+      </div>
+    </div>
+<div class="os-card os-orange">
+  <span class="os-icon">📅</span>
+  <div class="os-body">
+    <div class="os-val">{{ getTotalSessions() }}</div>
+    <div class="os-lbl">Sessions Recorded</div>
+  </div>
+</div>
+  </div>
+
+  <!-- ══ CLASS SELECTOR ════════════════════════════════════════════════ -->
+  <div class="class-selector">
+    <h2 class="selector-title">Select a Class</h2>
+    <div class="class-cards">
+      @for (cls of classes; track cls.id) {
+        <div
+          class="class-card"
+          [class.class-selected]="selectedClass()?.id === cls.id"
+          (click)="selectClass(cls)">
+          <div class="cc-icon {{ cls.color }}">{{ cls.icon }}</div>
+          <div class="cc-info">
+            <div class="cc-name">{{ cls.name }}</div>
+            <div class="cc-teacher">{{ cls.teacher }}</div>
+            <div class="cc-meta">
+              👥 {{ cls.students.length }} students ·
+              {{ cls.schedule }}
+            </div>
+          </div>
+          <div class="cc-history">
+            <span class="cc-sessions">
+              {{ attendanceHistory[cls.id]?.length ?? 0 }}
+            </span>
+            <span class="cc-sessions-lbl">sessions</span>
+          </div>
+          @if (selectedClass()?.id === cls.id) {
+            <span class="selected-tick">✓</span>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- ══ MAIN CONTENT — only shows when a class is selected ════════════ -->
+  @if (selectedClass()) {
+
+    <!-- ── MARK ATTENDANCE VIEW ── -->
+    @if (activeView() === 'mark') {
+      <div class="mark-section">
+
+        <!-- Section Header -->
+        <div class="mark-header">
+          <div class="mark-header-left">
+            <h2 class="mark-title">
+              {{ selectedClass()!.icon }} {{ selectedClass()!.name }}
+            </h2>
+            <p class="mark-sub">
+              {{ selectedClass()!.teacher }} ·
+              {{ selectedClass()!.students.length }} students
+            </p>
+          </div>
+          <div class="mark-header-right">
+            <!-- Date Picker -->
+            <input
+              type="date"
+              class="date-picker"
+              [value]="selectedDate()"
+              (change)="selectedDate.set($any($event.target).value)"
+            />
+          </div>
+        </div>
+
+        <!-- Success Message -->
+        @if (saveSuccess()) {
+          <div class="success-banner">
+            ✅ Attendance saved successfully for {{ formatDate(selectedDate()) }}!
+          </div>
+        }
+
+        <!-- Live Summary Bar -->
+        @if (markedCount() > 0) {
+          <div class="live-summary">
+            <div class="ls-item ls-present">
+              ✅ Present: <strong>{{ presentCount() }}</strong>
+            </div>
+            <div class="ls-item ls-absent">
+              ❌ Absent: <strong>{{ absentCount() }}</strong>
+            </div>
+            <div class="ls-item ls-late">
+              ⚠️ Late: <strong>{{ lateCount() }}</strong>
+            </div>
+            <div class="ls-item ls-total">
+              📊 Marked: <strong>{{ markedCount() }}/{{ selectedClass()!.students.length }}</strong>
+            </div>
+          </div>
+        }
+
+        <!-- Bulk Mark Buttons -->
+        <div class="bulk-actions">
+          <span class="bulk-label">Mark All:</span>
+          <button class="bulk-btn bulk-present" (click)="markAll('present')">
+            ✅ All Present
+          </button>
+          <button class="bulk-btn bulk-absent" (click)="markAll('absent')">
+            ❌ All Absent
+          </button>
+          <button class="bulk-btn bulk-late" (click)="markAll('late')">
+            ⚠️ All Late
+          </button>
+        </div>
+
+        <!-- Attendance Table -->
+        <div class="attendance-table-card">
+          <table class="attendance-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Student</th>
+                <th class="status-col">Present</th>
+                <th class="status-col">Absent</th>
+                <th class="status-col">Late</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (student of selectedClass()!.students; track student.id; let i = $index) {
+                <tr [class.row-present]="getStatus(student.id) === 'present'"
+                    [class.row-absent]="getStatus(student.id) === 'absent'"
+                    [class.row-late]="getStatus(student.id) === 'late'">
+
+                  <!-- Row Number -->
+                  <td class="row-num">{{ i + 1 }}</td>
+
+                  <!-- Student Name -->
+                  <td>
+                    <div class="student-cell">
+                      <div class="s-avatar">{{ student.avatar }}</div>
+                      <span class="s-name">{{ student.name }}</span>
+                    </div>
+                  </td>
+
+                  <!-- Present Radio -->
+                  <td class="status-col">
+                    <label class="radio-label radio-present">
+                      <input
+                        type="radio"
+                        [name]="'attendance_' + student.id"
+                        value="present"
+                        [checked]="getStatus(student.id) === 'present'"
+                        (change)="markAttendance(student.id, 'present')"
+                      />
+                      <span class="radio-custom"></span>
+                    </label>
+                  </td>
+
+                  <!-- Absent Radio -->
+                  <td class="status-col">
+                    <label class="radio-label radio-absent">
+                      <input
+                        type="radio"
+                        [name]="'attendance_' + student.id"
+                        value="absent"
+                        [checked]="getStatus(student.id) === 'absent'"
+                        (change)="markAttendance(student.id, 'absent')"
+                      />
+                      <span class="radio-custom"></span>
+                    </label>
+                  </td>
+
+                  <!-- Late Radio -->
+                  <td class="status-col">
+                    <label class="radio-label radio-late">
+                      <input
+                        type="radio"
+                        [name]="'attendance_' + student.id"
+                        value="late"
+                        [checked]="getStatus(student.id) === 'late'"
+                        (change)="markAttendance(student.id, 'late')"
+                      />
+                      <span class="radio-custom"></span>
+                    </label>
+                  </td>
+
+                  <!-- Status Badge -->
+                  <td>
+                    <span class="att-badge"
+                      [class.badge-present]="getStatus(student.id) === 'present'"
+                      [class.badge-absent]="getStatus(student.id) === 'absent'"
+                      [class.badge-late]="getStatus(student.id) === 'late'"
+                      [class.badge-none]="getStatus(student.id) === 'none'">
+                      {{ statusIcon(getStatus(student.id)) }}
+                      {{ getStatus(student.id) === 'none' ? 'Not Marked' : getStatus(student.id) }}
+                    </span>
+                  </td>
+
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Save Button -->
+        <div class="save-section">
+          <p class="save-hint">
+            @if (markedCount() < selectedClass()!.students.length) {
+              ⚠️ {{ selectedClass()!.students.length - markedCount() }} students not yet marked
+            } @else {
+              ✅ All students marked — ready to save
+            }
+          </p>
+          <button class="btn-save" (click)="saveAttendance()">
+            💾 Save Attendance for {{ formatDate(selectedDate()) }}
+          </button>
+        </div>
+
+      </div>
+    }
+
+    <!-- ── HISTORY VIEW ── -->
+    @if (activeView() === 'history') {
+      <div class="history-section">
+
+        <div class="history-header">
+          <h2 class="section-title">
+            📋 Attendance History —
+            {{ selectedClass()!.icon }} {{ selectedClass()!.name }}
+          </h2>
+          <p class="section-sub">
+            {{ classHistory().length }} sessions recorded
+          </p>
+        </div>
+
+        @if (classHistory().length === 0) {
+          <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <h3>No history yet</h3>
+            <p>Mark attendance first to see history here.</p>
+          </div>
+        }
+
+        <div class="history-list">
+          @for (record of classHistory(); track record.date) {
+            <div class="history-card">
+
+              <div class="hc-date-col">
+                <div class="hc-date">{{ formatDate(record.date) }}</div>
+                <div class="hc-total">
+                  {{ record.entries.length }} students
+                </div>
+              </div>
+
+              <!-- Mini attendance summary -->
+              <div class="hc-summary">
+                <div class="hcs-item hcs-present">
+                  ✅
+                  {{ record.entries.filter(e => e.status === 'present').length }}
+                  present
+                </div>
+                <div class="hcs-item hcs-absent">
+                  ❌
+                  {{ record.entries.filter(e => e.status === 'absent').length }}
+                  absent
+                </div>
+                <div class="hcs-item hcs-late">
+                  ⚠️
+                  {{ record.entries.filter(e => e.status === 'late').length }}
+                  late
+                </div>
+              </div>
+
+              <!-- Mini Progress Bar -->
+              <div class="hc-bar-wrap">
+                <div class="hc-bar-inner"
+                  [style.width.%]="getPercent(
+                    record.entries.filter(e => e.status === 'present').length,
+                    record.entries.length
+                  )">
+                </div>
+              </div>
+
+              <div class="hc-pct">
+                {{ getPercent(
+                    record.entries.filter(e => e.status === 'present').length,
+                    record.entries.length
+                  ) }}%
+              </div>
+
+              <!-- Expandable student list -->
+              <div class="hc-students-row">
+                @for (entry of record.entries; track entry.studentId) {
+                  <span class="mini-student"
+                    [class.mini-present]="entry.status === 'present'"
+                    [class.mini-absent]="entry.status === 'absent'"
+                    [class.mini-late]="entry.status === 'late'"
+                    [title]="'Student ' + entry.studentId + ': ' + entry.status">
+                    {{ statusIcon(entry.status) }}
+                  </span>
+                }
+              </div>
+
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ── MONTHLY REPORT VIEW ── -->
+    @if (activeView() === 'report') {
+      <div class="report-section">
+
+        <div class="report-header">
+          <h2 class="section-title">
+            📊 Monthly Report —
+            {{ selectedClass()!.icon }} {{ selectedClass()!.name }}
+          </h2>
+          <p class="section-sub">
+            Based on {{ classHistory().length }} recorded sessions
+          </p>
+        </div>
+
+        @if (monthlyReport().length === 0) {
+          <div class="empty-state">
+            <div class="empty-icon">📊</div>
+            <h3>No data yet</h3>
+            <p>Record some attendance sessions to generate a report.</p>
+          </div>
+        }
+
+        <!-- Report Table -->
+        <div class="report-card">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Present</th>
+                <th>Absent</th>
+                <th>Late</th>
+                <th>Total Classes</th>
+                <th>Attendance %</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (report of monthlyReport(); track report.studentId) {
+                <tr>
+                  <td>
+                    <div class="student-cell">
+                      <div class="s-avatar">{{ report.avatar }}</div>
+                      <span class="s-name">{{ report.studentName }}</span>
+                    </div>
+                  </td>
+                  <td class="count-present">{{ report.present }}</td>
+                  <td class="count-absent">{{ report.absent }}</td>
+                  <td class="count-late">{{ report.late }}</td>
+                  <td class="count-total">{{ report.total }}</td>
+                  <td>
+                    <!-- Inline progress bar -->
+                    <div class="inline-progress">
+                      <div class="inline-bar"
+                        [style.width.%]="getPercent(report.present, report.total)"
+                        [class.bar-good]="getPercent(report.present, report.total) >= 80"
+                        [class.bar-ok]="getPercent(report.present, report.total) >= 60 && getPercent(report.present, report.total) < 80"
+                        [class.bar-low]="getPercent(report.present, report.total) < 60">
+                      </div>
+                      <span class="inline-pct">
+                        {{ getPercent(report.present, report.total) }}%
+                      </span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="perf-badge"
+                      [class.perf-excellent]="getPercent(report.present, report.total) >= 90"
+                      [class.perf-good]="getPercent(report.present, report.total) >= 75 && getPercent(report.present, report.total) < 90"
+                      [class.perf-average]="getPercent(report.present, report.total) >= 60 && getPercent(report.present, report.total) < 75"
+                      [class.perf-poor]="getPercent(report.present, report.total) < 60">
+                      @if (getPercent(report.present, report.total) >= 90) { 🌟 Excellent }
+                      @else if (getPercent(report.present, report.total) >= 75) { ✅ Good }
+                      @else if (getPercent(report.present, report.total) >= 60) { ⚠️ Average }
+                      @else { 🚨 Poor }
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Class Average -->
+        <div class="class-average">
+          <div class="ca-label">Class Average Attendance</div>
+          <div class="ca-bar-wrap">
+            <div class="ca-bar"
+              [style.width.%]="getPercent(
+                monthlyReport().reduce((s,r) => s + r.present, 0),
+                monthlyReport().reduce((s,r) => s + r.total, 0)
+              )">
+            </div>
+          </div>
+          <div class="ca-pct">
+            {{ getPercent(
+                monthlyReport().reduce((s,r) => s + r.present, 0),
+                monthlyReport().reduce((s,r) => s + r.total, 0)
+              ) }}%
+          </div>
+        </div>
+
+      </div>
+    }
+
+  } @else {
+
+    <!-- No class selected placeholder -->
+    <div class="no-class-selected">
+      <div class="ncs-icon">🏫</div>
+      <h3 class="ncs-title">Select a Class Above</h3>
+      <p class="ncs-sub">
+        Choose a class from the list above to mark attendance,
+        view history, or generate reports.
+      </p>
+    </div>
+  }
+
+</div>
