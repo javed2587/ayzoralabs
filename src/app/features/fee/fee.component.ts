@@ -1,6 +1,6 @@
 import { Component, signal, computed, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+//import { RouterLink } from '@angular/router';
 
 // ── Local Interfaces ──────────────────────────────────────────────────────────
 
@@ -41,7 +41,7 @@ type FeeFilter = 'all' | 'paid' | 'unpaid' | 'overdue';
 @Component({
   selector:    'app-fee',
   standalone:  true,
-  imports:     [ReactiveFormsModule, RouterLink],
+  imports:     [ReactiveFormsModule],
   templateUrl: './fee.component.html',
   styleUrl:    './fee.component.css'
 })

@@ -1,5 +1,5 @@
 import { Component, signal, computed }  from '@angular/core';
-import { RouterLink }                    from '@angular/router';
+
 import { Teacher }                       from '../../shared/models/teacher';
 
 // ── Local interfaces — only used in this component ────────────────────────────
@@ -49,7 +49,7 @@ type TeacherView = 'list' | 'profile' | 'salary' | 'schedule' | 'attendance';
 @Component({
   selector:    'app-teacher',
   standalone:  true,
-  imports:     [RouterLink],
+  imports:     [],
   templateUrl: './teacher.component.html',
   styleUrl:    './teacher.component.css'
 })
