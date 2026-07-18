@@ -1,0 +1,350 @@
+<div class="player-wrapper">
+
+  <!-- ══ TOP BAR ═══════════════════════════════════════════════════════ -->
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <a routerLink="/courses" class="back-link">← Courses</a>
+      <span class="separator">›</span>
+      <span class="course-title-top">
+        {{ playlist.icon }} {{ playlist.title }}
+      </span>
+    </div>
+
+    <div class="top-bar-center">
+      <div class="progress-wrap">
+        <div class="progress-bar-outer">
+          <div class="progress-bar-inner"
+               [style.width.%]="progressPercent()">
+          </div>
+        </div>
+        <span class="progress-text">
+          {{ completedCount() }}/{{ lectures().length }} completed
+          ({{ progressPercent() }}%)
+        </span>
+      </div>
+    </div>
+
+    <div class="top-bar-right">
+      <button class="sidebar-toggle-btn" (click)="toggleSidebar()">
+        {{ sidebarOpen() ? '⟩ Hide Playlist' : '⟨ Show Playlist' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ MAIN LAYOUT ═══════════════════════════════════════════════════ -->
+  <div class="player-layout" [class.sidebar-hidden]="!sidebarOpen()">
+
+    <!-- ── LEFT — Video + Content ────────────────────────────────────── -->
+    <div class="player-main">
+
+      <!-- Video Player -->
+      <div class="video-container">
+        <iframe
+          [src]="safeVideoUrl()"
+          class="video-iframe"
+          frameborder="0"
+          allowfullscreen
+          allow="accelerometer; autoplay; clipboard-write;
+                 encrypted-media; gyroscope"
+          (load)="onVideoLoad()"
+          [title]="currentLecture().title">
+        </iframe>
+      </div>
+
+      <!-- Lecture Header -->
+      <div class="lecture-header">
+        <div class="lecture-header-left">
+          <div class="lecture-number-badge">
+            Lecture {{ currentIndex() + 1 }}
+            of {{ lectures().length }}
+          </div>
+          <h1 class="lecture-title">{{ currentLecture().title }}</h1>
+          <div class="lecture-meta">
+            <span class="meta-item">⏱️ {{ currentLecture().duration }}</span>
+            <span class="meta-item">👨‍🏫 {{ playlist.teacher }}</span>
+            @if (currentLecture().free) {
+              <span class="free-badge">🆓 Free Preview</span>
+            }
+            @if (currentLecture().completed) {
+              <span class="completed-badge">✅ Completed</span>
+            }
+          </div>
+        </div>
+
+        @if (!currentLecture().completed) {
+          <button class="btn-complete" (click)="markComplete()">
+            ✅ Mark as Complete
+          </button>
+        }
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="nav-buttons">
+        <button
+          class="nav-btn prev-btn"
+          [disabled]="isFirst()"
+          (click)="prevLecture()">
+          ← Previous
+        </button>
+
+        <div class="nav-center">
+          @for (lecture of lectures(); track lecture.id; let i = $index) {
+            <button
+              class="dot-btn"
+              [class.dot-active]="currentIndex() === i"
+              [class.dot-done]="lecture.completed"
+              (click)="goToLecture(i)"
+              [title]="lecture.title">
+            </button>
+          }
+        </div>
+
+        <button
+          class="nav-btn next-btn"
+          [disabled]="isLast()"
+          (click)="nextLecture()">
+          Next →
+        </button>
+      </div>
+
+      <!-- Tab Bar -->
+      <div class="tab-bar">
+        <button
+          class="tab-btn"
+          [class.tab-active]="activeTab() === 'description'"
+          (click)="setTab('description')">
+          📄 Description
+        </button>
+        <button
+          class="tab-btn"
+          [class.tab-active]="activeTab() === 'notes'"
+          (click)="setTab('notes')">
+          📝 My Notes
+          @if (currentNotes().length > 0) {
+            <span class="tab-badge">{{ currentNotes().length }}</span>
+          }
+        </button>
+        <button
+          class="tab-btn"
+          [class.tab-active]="activeTab() === 'resources'"
+          (click)="setTab('resources')">
+          📎 Resources
+          <span class="tab-badge">
+            {{ currentLecture().resources.length }}
+          </span>
+        </button>
+      </div>
+
+      <!-- ── DESCRIPTION TAB ────────────────────────────────────────── -->
+      @if (activeTab() === 'description') {
+        <div class="tab-content">
+          <div class="description-card">
+            <h2 class="desc-heading">About this Lecture</h2>
+            <p class="desc-text">{{ currentLecture().description }}</p>
+            <div class="learn-points">
+              <h3 class="learn-title">In this lecture you will learn:</h3>
+              <ul class="learn-list">
+                <li>Core concepts explained with simple examples</li>
+                <li>Hands-on coding exercises to practice</li>
+                <li>Real-world application of the topic</li>
+                <li>Common mistakes and how to avoid them</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ── NOTES TAB ──────────────────────────────────────────────── -->
+      @if (activeTab() === 'notes') {
+        <div class="tab-content">
+          <div class="notes-card">
+
+            <div class="add-note-section">
+              <h2 class="notes-heading">📝 My Notes</h2>
+              <p class="notes-sub">
+                Notes for "{{ currentLecture().title }}"
+              </p>
+              <div class="note-input-wrap">
+                <textarea
+                  class="note-textarea"
+                  placeholder="Type your note here..."
+                  rows="4"
+                  [value]="noteText()"
+                  (input)="onNoteInput($event)">
+                </textarea>
+                <button
+                  class="btn-add-note"
+                  (click)="addNote()"
+                  [disabled]="!noteText().trim()">
+                  + Add Note
+                </button>
+              </div>
+            </div>
+
+            @if (currentNotes().length === 0) {
+              <div class="no-notes">
+                <div class="no-notes-icon">📝</div>
+                <p>No notes yet for this lecture.</p>
+                <p class="no-notes-hint">
+                  Add your first note above!
+                </p>
+              </div>
+            }
+
+            <div class="notes-list">
+              @for (note of currentNotes(); track note.id) {
+                <div class="note-card">
+
+                  @if (editingNoteId() === note.id) {
+                    <div class="note-edit-mode">
+                      <textarea
+                        class="note-textarea note-edit-textarea"
+                        rows="3"
+                        [value]="editText()"
+                        (input)="onEditInput($event)">
+                      </textarea>
+                      <div class="note-edit-actions">
+                        <button class="btn-save-note"
+                          (click)="saveEdit(note.id)">
+                          💾 Save
+                        </button>
+                        <button class="btn-cancel-note"
+                          (click)="cancelEdit()">
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="note-view-mode">
+                      <div class="note-meta">
+                        <span class="note-time">
+                          🕐 {{ note.timestamp }}
+                        </span>
+                        <div class="note-actions">
+                          <button class="note-action-btn"
+                            (click)="startEdit(note)">✏️</button>
+                          <button class="note-action-btn"
+                            (click)="deleteNote(note.id)">🗑️</button>
+                        </div>
+                      </div>
+                      <p class="note-text">{{ note.text }}</p>
+                    </div>
+                  }
+
+                </div>
+              }
+            </div>
+
+          </div>
+        </div>
+      }
+
+      <!-- ── RESOURCES TAB ──────────────────────────────────────────── -->
+      @if (activeTab() === 'resources') {
+        <div class="tab-content">
+          <div class="resources-card">
+            <h2 class="resources-heading">📎 Resources</h2>
+            <p class="resources-sub">
+              For "{{ currentLecture().title }}"
+            </p>
+
+            @if (currentLecture().resources.length === 0) {
+              <div class="no-resources">
+                <p>No resources for this lecture.</p>
+              </div>
+            }
+
+            <div class="resources-list">
+              @for (resource of currentLecture().resources;
+                    track resource) {
+                <div class="resource-item">
+                  <div class="resource-icon">
+                    @if (resource.endsWith('.pdf'))  { 📄 }
+                    @if (resource.endsWith('.py'))   { 🐍 }
+                    @if (resource.endsWith('.zip'))  { 🗜️ }
+                    @if (resource.endsWith('.docx')) { 📝 }
+                  </div>
+                  <div class="resource-info">
+                    <div class="resource-name">{{ resource }}</div>
+                    <div class="resource-type">
+                      {{ resource.split('.').pop()!.toUpperCase() }} File
+                    </div>
+                  </div>
+                  <button class="btn-download">⬇️ Download</button>
+                </div>
+              }
+            </div>
+
+          </div>
+        </div>
+      }
+
+    </div>
+
+    <!-- ── RIGHT — Playlist Sidebar ──────────────────────────────────── -->
+    @if (sidebarOpen()) {
+      <aside class="playlist-sidebar">
+
+        <div class="sidebar-header">
+          <h2 class="sidebar-title">
+            {{ playlist.icon }} {{ playlist.title }}
+          </h2>
+          <div class="sidebar-meta">
+            {{ lectures().length }} lectures ·
+            {{ completedCount() }} completed
+          </div>
+          <div class="sidebar-progress">
+            <div class="sp-bar-outer">
+              <div class="sp-bar-inner"
+                   [style.width.%]="progressPercent()">
+              </div>
+            </div>
+            <span class="sp-pct">{{ progressPercent() }}%</span>
+          </div>
+        </div>
+
+        <div class="lecture-list">
+          @for (lecture of lectures();
+                track lecture.id; let i = $index) {
+            <div
+              class="lecture-item"
+              [class.lecture-active]="currentIndex() === i"
+              [class.lecture-done]="lecture.completed"
+              (click)="goToLecture(i)">
+
+              <div class="li-thumb"
+                   [class.thumb-active]="currentIndex() === i"
+                   [class.thumb-done]="lecture.completed">
+                @if (lecture.completed)        { ✅ }
+                @else if (currentIndex() === i) { ▶️ }
+                @else                          { {{ lecture.thumbnail }} }
+              </div>
+
+              <div class="li-info">
+                <div class="li-number">Lecture {{ i + 1 }}</div>
+                <div class="li-title">{{ lecture.title }}</div>
+                <div class="li-meta">
+                  ⏱️ {{ lecture.duration }}
+                  @if (lecture.free) {
+                    <span class="li-free">Free</span>
+                  }
+                </div>
+              </div>
+
+              @if (currentIndex() === i) {
+                <div class="li-playing">
+                  <span class="playing-dot d1"></span>
+                  <span class="playing-dot d2"></span>
+                  <span class="playing-dot d3"></span>
+                </div>
+              }
+
+            </div>
+          }
+        </div>
+
+      </aside>
+    }
+
+  </div>
+</div>

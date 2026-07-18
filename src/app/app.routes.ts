@@ -66,9 +66,14 @@ loadComponent: () =>
     import('./features/attendance/attendance.component')
       .then(m => m.AttendanceComponent)
 },
+{
+  path: 'learn/:courseId',
+  loadComponent: () => 
+    import('./features/learning/video-lecture/video-lecture.component').then(m => m.VideoLectureComponent)
+},
   {
     path: '**',
     redirectTo: ''   // redirect unknown URLs to home
-  }
+  },
 
 ];
