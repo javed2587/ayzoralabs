@@ -1,0 +1,532 @@
+<div class="assignments-wrapper">
+
+  <!-- ══ PAGE HEADER ════════════════════════════════════════════════════ -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">📝 Assignments</h1>
+      <p class="page-sub">
+        {{ pendingCount() }} pending ·
+        {{ overdueCount() }} overdue ·
+        {{ gradedCount() }} graded
+      </p>
+    </div>
+    @if (activeView() !== 'list') {
+      <button class="btn-back" (click)="goBack()">
+        ← Back to Assignments
+      </button>
+    }
+  </div>
+
+  <!-- ══ STATS CARDS ════════════════════════════════════════════════════ -->
+  @if (activeView() === 'list') {
+    <div class="stats-row">
+      <div class="stat-card stat-orange">
+        <div class="stat-icon">📋</div>
+        <div class="stat-body">
+          <div class="stat-val">{{ gradeStats().total }}</div>
+          <div class="stat-lbl">Total</div>
+        </div>
+      </div>
+      <div class="stat-card stat-yellow">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-body">
+          <div class="stat-val">{{ pendingCount() }}</div>
+          <div class="stat-lbl">Pending</div>
+        </div>
+      </div>
+      <div class="stat-card stat-blue">
+        <div class="stat-icon">📤</div>
+        <div class="stat-body">
+          <div class="stat-val">{{ submittedCount() }}</div>
+          <div class="stat-lbl">Submitted</div>
+        </div>
+      </div>
+      <div class="stat-card stat-green">
+        <div class="stat-icon">🏆</div>
+        <div class="stat-body">
+          <div class="stat-val">{{ gradeStats().avgGrade }}%</div>
+          <div class="stat-lbl">Avg Grade</div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ══ LIST VIEW ══════════════════════════════════════════════════════ -->
+  @if (activeView() === 'list') {
+
+    <!-- Search + Filter -->
+    <div class="controls-bar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search assignments..."
+          (input)="onSearch($event)"
+        />
+      </div>
+      <div class="filter-tabs">
+        @for (tab of [
+          { value: 'all',       label: 'All',       count: assignments.length },
+          { value: 'pending',   label: 'Pending',   count: pendingCount()     },
+          { value: 'submitted', label: 'Submitted', count: submittedCount()   },
+          { value: 'graded',    label: 'Graded',    count: gradedCount()      },
+          { value: 'overdue',   label: 'Overdue',   count: overdueCount()     }
+        ]; track tab.value) {
+          <button
+            class="filter-tab"
+            [class.tab-active]="activeFilter() === tab.value"
+            (click)="setFilter(tab.value === 'all'       ? 'all'       :
+                               tab.value === 'pending'   ? 'pending'   :
+                               tab.value === 'submitted' ? 'submitted' :
+                               tab.value === 'graded'    ? 'graded'    : 'overdue')">
+            {{ tab.label }}
+            <span class="tab-count">{{ tab.count }}</span>
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Assignment Cards -->
+    <div class="assignments-list">
+      @for (assignment of filteredAssignments(); track assignment.id) {
+        <div class="assignment-card"
+          [class.card-overdue]="assignment.status === 'overdue'"
+          [class.card-graded]="assignment.status === 'graded'">
+
+          <!-- Left — Icon + Info -->
+          <div class="card-left" (click)="openDetail(assignment)">
+            <div class="course-icon">{{ assignment.courseIcon }}</div>
+            <div class="card-info">
+              <div class="card-title">{{ assignment.title }}</div>
+              <div class="card-meta">
+                <span class="meta-course">{{ assignment.course }}</span>
+                <span class="meta-dot">·</span>
+                <span class="meta-teacher">{{ assignment.teacher }}</span>
+                <span class="meta-dot">·</span>
+                <span class="meta-points">{{ assignment.points }} pts</span>
+              </div>
+              <div class="card-due">
+                📅 Due {{ assignment.dueDate }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Right — Status + Actions -->
+          <div class="card-right">
+
+            <!-- Days Left Badge -->
+            <div class="days-badge"
+              [class]="getDaysLeftClass(assignment.dueDateFull, assignment.status)">
+              {{ getDaysLeftLabel(assignment.dueDateFull, assignment.status) }}
+            </div>
+
+            <!-- Status Badge -->
+            <span class="status-badge"
+              [class.badge-pending]="assignment.status === 'pending'"
+              [class.badge-submitted]="assignment.status === 'submitted'"
+              [class.badge-graded]="assignment.status === 'graded'"
+              [class.badge-overdue]="assignment.status === 'overdue'">
+              @if (assignment.status === 'pending')   { ⏳ Pending   }
+              @if (assignment.status === 'submitted') { 📤 Submitted }
+              @if (assignment.status === 'graded')    {
+                🏆 {{ assignment.grade }}/{{ assignment.points }}
+              }
+              @if (assignment.status === 'overdue')   { 🚨 Overdue   }
+            </span>
+
+            <!-- Priority -->
+            <span class="priority-tag"
+              [class.priority-high]="assignment.priority === 'high'"
+              [class.priority-medium]="assignment.priority === 'medium'"
+              [class.priority-low]="assignment.priority === 'low'">
+              {{ assignment.priority }}
+            </span>
+
+            <!-- Action Buttons -->
+            <div class="card-actions">
+              <button class="btn-view"
+                (click)="openDetail(assignment)">
+                View
+              </button>
+              @if (assignment.status === 'pending' ||
+                   assignment.status === 'overdue') {
+                <button class="btn-submit-now"
+                  (click)="openSubmit(assignment)">
+                  Submit →
+                </button>
+              }
+            </div>
+
+          </div>
+        </div>
+      }
+
+      <!-- Empty State -->
+      @if (filteredAssignments().length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">📝</div>
+          <h3>No assignments found</h3>
+          <p>Try changing the filter or search term.</p>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ══ DETAIL VIEW ════════════════════════════════════════════════════ -->
+  @if (activeView() === 'detail' && selectedAssignment()) {
+    <div class="detail-layout">
+
+      <!-- Main Content -->
+      <div class="detail-main">
+
+        <!-- Assignment Hero -->
+        <div class="detail-hero">
+          <div class="detail-hero-top">
+            <div class="detail-course-icon">
+              {{ selectedAssignment()!.courseIcon }}
+            </div>
+            <div class="detail-course-info">
+              <div class="detail-course-name">
+                {{ selectedAssignment()!.course }}
+              </div>
+              <div class="detail-teacher">
+                👨‍🏫 {{ selectedAssignment()!.teacher }}
+              </div>
+            </div>
+            <span class="status-badge"
+              [class.badge-pending]="selectedAssignment()!.status === 'pending'"
+              [class.badge-submitted]="selectedAssignment()!.status === 'submitted'"
+              [class.badge-graded]="selectedAssignment()!.status === 'graded'"
+              [class.badge-overdue]="selectedAssignment()!.status === 'overdue'">
+              @if (selectedAssignment()!.status === 'pending')   { ⏳ Pending   }
+              @if (selectedAssignment()!.status === 'submitted') { 📤 Submitted }
+              @if (selectedAssignment()!.status === 'graded')    { 🏆 Graded    }
+              @if (selectedAssignment()!.status === 'overdue')   { 🚨 Overdue   }
+            </span>
+          </div>
+          <h1 class="detail-title">{{ selectedAssignment()!.title }}</h1>
+          <div class="detail-meta-row">
+            <span class="detail-meta-item">
+              📅 Due {{ selectedAssignment()!.dueDate }}
+            </span>
+            <span class="detail-meta-item">
+              🏆 {{ selectedAssignment()!.points }} points
+            </span>
+            <span class="detail-meta-item">
+              📄 {{ selectedAssignment()!.type }} submission
+            </span>
+          </div>
+        </div>
+
+        <!-- Grade Result (if graded) -->
+        @if (selectedAssignment()!.status === 'graded') {
+          <div class="grade-card"
+            [class]="getGradeColor(
+              selectedAssignment()!.grade!,
+              selectedAssignment()!.points
+            )">
+            <div class="grade-card-left">
+              <div class="grade-score">
+                {{ selectedAssignment()!.grade }}
+                <span class="grade-total">
+                  / {{ selectedAssignment()!.points }}
+                </span>
+              </div>
+              <div class="grade-pct">
+                {{ Math.round(
+                    (selectedAssignment()!.grade! /
+                     selectedAssignment()!.points) * 100
+                   ) }}%
+              </div>
+            </div>
+            <div class="grade-card-right">
+              <div class="grade-label">Teacher Feedback</div>
+              <p class="grade-feedback">
+                {{ selectedAssignment()!.feedback }}
+              </p>
+            </div>
+          </div>
+        }
+
+        <!-- Submission Info (if submitted) -->
+        @if (selectedAssignment()!.status === 'submitted') {
+          <div class="submitted-banner">
+            <span class="sb-icon">📤</span>
+            <div>
+              <div class="sb-title">Assignment Submitted</div>
+              <div class="sb-meta">
+                Submitted on {{ selectedAssignment()!.submittedOn }}
+                @if (selectedAssignment()!.fileName) {
+                  · File: {{ selectedAssignment()!.fileName }}
+                }
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Description -->
+        <div class="detail-card">
+          <h2 class="detail-card-title">📋 Description</h2>
+          <p class="detail-description">
+            {{ selectedAssignment()!.description }}
+          </p>
+        </div>
+
+        <!-- Instructions -->
+        <div class="detail-card">
+          <h2 class="detail-card-title">📌 Instructions</h2>
+          <ol class="instructions-list">
+            @for (instruction of selectedAssignment()!.instructions;
+                  track instruction) {
+              <li class="instruction-item">{{ instruction }}</li>
+            }
+          </ol>
+        </div>
+
+        <!-- Attachments -->
+        @if (selectedAssignment()!.attachments.length > 0) {
+          <div class="detail-card">
+            <h2 class="detail-card-title">📎 Resources & Attachments</h2>
+            <div class="attachments-list">
+              @for (file of selectedAssignment()!.attachments; track file) {
+                <div class="attachment-item">
+                  <span class="attach-icon">
+                    @if (file.endsWith('.pdf')) { 📄 }
+                    @if (file.endsWith('.py'))  { 🐍 }
+                    @if (file.endsWith('.zip')) { 🗜️ }
+                  </span>
+                  <span class="attach-name">{{ file }}</span>
+                  <button class="btn-download">⬇️ Download</button>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Submit Button -->
+        @if (selectedAssignment()!.status === 'pending' ||
+             selectedAssignment()!.status === 'overdue') {
+          <div class="detail-submit-bar">
+            <button class="btn-go-submit"
+              (click)="openSubmit(selectedAssignment()!)">
+              📤 Submit This Assignment →
+            </button>
+          </div>
+        }
+
+      </div>
+
+      <!-- Sidebar -->
+      <div class="detail-sidebar">
+        <div class="sidebar-card">
+          <h3 class="sidebar-title">📊 Assignment Info</h3>
+          <div class="info-list">
+            <div class="info-row">
+              <span class="info-lbl">Due Date</span>
+              <span class="info-val">{{ selectedAssignment()!.dueDate }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-lbl">Points</span>
+              <span class="info-val">{{ selectedAssignment()!.points }} pts</span>
+            </div>
+            <div class="info-row">
+              <span class="info-lbl">Type</span>
+              <span class="info-val">{{ selectedAssignment()!.type }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-lbl">Priority</span>
+              <span class="info-val">
+                <span class="priority-tag"
+                  [class.priority-high]="selectedAssignment()!.priority === 'high'"
+                  [class.priority-medium]="selectedAssignment()!.priority === 'medium'"
+                  [class.priority-low]="selectedAssignment()!.priority === 'low'">
+                  {{ selectedAssignment()!.priority }}
+                </span>
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="info-lbl">Time Left</span>
+              <span class="info-val"
+                [class]="getDaysLeftClass(
+                  selectedAssignment()!.dueDateFull,
+                  selectedAssignment()!.status
+                )">
+                {{ getDaysLeftLabel(
+                    selectedAssignment()!.dueDateFull,
+                    selectedAssignment()!.status
+                   ) }}
+              </span>
+            </div>
+            @if (selectedAssignment()!.submittedOn) {
+              <div class="info-row">
+                <span class="info-lbl">Submitted</span>
+                <span class="info-val">{{ selectedAssignment()!.submittedOn }}</span>
+              </div>
+            }
+            @if (selectedAssignment()!.grade !== undefined) {
+              <div class="info-row">
+                <span class="info-lbl">Grade</span>
+                <span class="info-val grade-val">
+                  {{ selectedAssignment()!.grade }}/{{ selectedAssignment()!.points }}
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+    </div>
+  }
+
+  <!-- ══ SUBMIT VIEW ════════════════════════════════════════════════════ -->
+  @if (activeView() === 'submit' && selectedAssignment()) {
+    <div class="submit-layout">
+
+      <div class="submit-card">
+        <div class="submit-header">
+          <div class="sh-icon">{{ selectedAssignment()!.courseIcon }}</div>
+          <div class="sh-info">
+            <h2 class="sh-title">{{ selectedAssignment()!.title }}</h2>
+            <p class="sh-meta">
+              {{ selectedAssignment()!.course }} ·
+              Due {{ selectedAssignment()!.dueDate }} ·
+              {{ selectedAssignment()!.points }} points
+            </p>
+          </div>
+        </div>
+
+        <!-- Success Screen -->
+        @if (submitSuccess()) {
+          <div class="success-screen">
+            <div class="success-icon">🎉</div>
+            <h3 class="success-title">Assignment Submitted!</h3>
+            <p class="success-msg">
+              Your assignment has been submitted successfully.
+              Your teacher will review and grade it soon.
+            </p>
+            <div class="success-actions">
+              <button class="btn-primary" (click)="goBack()">
+                ← Back to Assignments
+              </button>
+            </div>
+          </div>
+        }
+
+        @if (!submitSuccess()) {
+
+          <!-- File Upload Submission -->
+          @if (selectedAssignment()!.type === 'file') {
+            <div class="submit-section">
+              <h3 class="submit-section-title">📎 Upload Your Work</h3>
+              <p class="submit-section-sub">
+                Upload your completed assignment file.
+                Max size: 10MB
+              </p>
+
+              @if (!uploadedFile()) {
+                <label class="upload-dropzone" for="fileUpload">
+                  <div class="dropzone-icon">📁</div>
+                  <div class="dropzone-text">
+                    Click to choose file
+                  </div>
+                  <div class="dropzone-hint">
+                    PDF, DOC, PY, ZIP accepted · Max 10MB
+                  </div>
+                  <input
+                    id="fileUpload"
+                    type="file"
+                    class="hidden-input"
+                    accept=".pdf,.doc,.docx,.py,.zip,.txt"
+                    (change)="onFileSelected($event)"
+                  />
+                </label>
+              } @else {
+                <div class="uploaded-file">
+                  <div class="uf-icon">📄</div>
+                  <div class="uf-info">
+                    <div class="uf-name">{{ uploadedFile()!.name }}</div>
+                    <div class="uf-size">
+                      {{ formatFileSize(uploadedFile()!.size) }}
+                    </div>
+                  </div>
+                  <button class="uf-remove" (click)="removeFile()">
+                    ✕ Remove
+                  </button>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Text Submission -->
+          @if (selectedAssignment()!.type === 'text') {
+            <div class="submit-section">
+              <h3 class="submit-section-title">✍️ Write Your Answer</h3>
+              <p class="submit-section-sub">
+                Type your response below (minimum 50 characters)
+              </p>
+              <form [formGroup]="textForm" novalidate>
+                <textarea
+                  formControlName="answer"
+                  class="text-submission"
+                  placeholder="Type your assignment answer here..."
+                  rows="10">
+                </textarea>
+                @if (answer?.invalid && answer?.touched) {
+                  <div class="error-msg">
+                    @if (answer?.errors?.['required'])  {
+                      Please write your answer.
+                    }
+                    @if (answer?.errors?.['minlength']) {
+                      Answer must be at least 50 characters.
+                    }
+                  </div>
+                }
+                <div class="char-count">
+                  {{ textForm.get('answer')?.value?.length || 0 }}
+                  characters
+                </div>
+              </form>
+            </div>
+          }
+
+          <!-- Submit Button -->
+          <div class="submit-actions">
+            <button class="btn-cancel" (click)="goBack()">
+              Cancel
+            </button>
+            <button
+              class="btn-final-submit"
+              [disabled]="!canSubmit() || isSubmitting()"
+              (click)="onSubmit()">
+              @if (isSubmitting()) {
+                <span class="spinner"></span> Submitting...
+              } @else {
+                📤 Submit Assignment
+              }
+            </button>
+          </div>
+
+        }
+      </div>
+
+      <!-- Submit Sidebar -->
+      <div class="submit-sidebar">
+        <div class="sidebar-card">
+          <h3 class="sidebar-title">📋 Checklist</h3>
+          <ul class="checklist">
+            @for (instruction of selectedAssignment()!.instructions;
+                  track instruction) {
+              <li class="checklist-item">
+                <span class="check-icon">☐</span>
+                {{ instruction }}
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  }
+
+</div>

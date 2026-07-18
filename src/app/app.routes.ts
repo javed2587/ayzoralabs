@@ -71,8 +71,14 @@ loadComponent: () =>
   loadComponent: () => 
     import('./features/learning/video-lecture/video-lecture.component').then(m => m.VideoLectureComponent)
 },
+{
+  path: 'assignments',
+  loadComponent: () =>
+    import('./features/assignments/assignments.component')
+      .then(m => m.AssignmentsComponent)
+},
   {
     path: '**',
     redirectTo: ''   // redirect unknown URLs to home
-  },
+  }
 ];
