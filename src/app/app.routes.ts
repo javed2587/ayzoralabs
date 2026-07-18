@@ -75,5 +75,4 @@ loadComponent: () =>
     path: '**',
     redirectTo: ''   // redirect unknown URLs to home
   },
-
 ];
