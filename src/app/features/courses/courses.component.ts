@@ -93,7 +93,7 @@ export class CoursesComponent {
       id: 5,
       title: 'Web Design with HTML & CSS',
       description: 'Create beautiful, responsive websites from scratch. Learn modern web design fundamentals.',
-      teacherName: 'Sir Kamran',
+      teacherName: 'Miss Iman Khan',
       teacherAvatar: 'SK',
       duration: '2 months',
       sessions: 18,
