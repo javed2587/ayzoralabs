@@ -77,6 +77,12 @@ loadComponent: () =>
     import('./features/assignments/assignments.component')
       .then(m => m.AssignmentsComponent)
 },
+{
+  path: 'notifications',
+  loadComponent: () =>
+    import('./features/notifications/notifications.component')
+      .then(m => m.NotificationsComponent)
+},
   {
     path: '**',
     redirectTo: ''   // redirect unknown URLs to home

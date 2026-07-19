@@ -1,0 +1,271 @@
+<div class="notifications-page">
+
+  <!-- ══ PAGE HEADER ════════════════════════════════════════════════════ -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon-wrap">
+        <span class="header-icon">🔔</span>
+        @if (unreadCount() > 0) {
+          <span class="header-badge">{{ unreadCount() }}</span>
+        }
+      </div>
+      <div>
+        <h1 class="page-title">Notifications</h1>
+        <p class="page-sub">
+          {{ unreadCount() }} unread ·
+          {{ notifications().length }} total
+        </p>
+      </div>
+    </div>
+    <div class="header-actions">
+      @if (unreadCount() > 0) {
+        <button class="btn-mark-all" (click)="markAllRead()">
+          ✅ Mark all as read
+        </button>
+      }
+      <button class="btn-clear" (click)="clearAll()">
+        🗑️ Clear read
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ STATS ROW ══════════════════════════════════════════════════════ -->
+  <div class="notif-stats">
+    <div class="ns-card ns-unread">
+      <span class="ns-icon">🔴</span>
+      <div class="ns-body">
+        <div class="ns-val">{{ unreadCount() }}</div>
+        <div class="ns-lbl">Unread</div>
+      </div>
+    </div>
+    <div class="ns-card ns-class">
+      <span class="ns-icon">📅</span>
+      <div class="ns-body">
+        <div class="ns-val">{{ typeCounts().class }}</div>
+        <div class="ns-lbl">Classes</div>
+      </div>
+    </div>
+    <div class="ns-card ns-assign">
+      <span class="ns-icon">📝</span>
+      <div class="ns-body">
+        <div class="ns-val">{{ typeCounts().assignment }}</div>
+        <div class="ns-lbl">Assignments</div>
+      </div>
+    </div>
+    <div class="ns-card ns-achieve">
+      <span class="ns-icon">🏆</span>
+      <div class="ns-body">
+        <div class="ns-val">{{ typeCounts().achievement }}</div>
+        <div class="ns-lbl">Achievements</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ VIEW TABS + FILTER ═════════════════════════════════════════════ -->
+  <div class="controls-section">
+
+    <!-- Read / Unread Tabs -->
+    <div class="view-tabs">
+      <button
+        class="view-tab"
+        [class.view-tab-active]="activeView() === 'all'"
+        (click)="setView('all')">
+        All
+        <span class="tab-count">{{ notifications().length }}</span>
+      </button>
+      <button
+        class="view-tab"
+        [class.view-tab-active]="activeView() === 'unread'"
+        (click)="setView('unread')">
+        Unread
+        @if (unreadCount() > 0) {
+          <span class="tab-count unread-count">{{ unreadCount() }}</span>
+        }
+      </button>
+    </div>
+
+    <!-- Type Filter Pills -->
+    <div class="type-filters">
+      @for (filter of [
+        { value: 'all',         label: 'All',          icon: '🔔' },
+        { value: 'class',       label: 'Classes',      icon: '📅' },
+        { value: 'assignment',  label: 'Assignments',  icon: '📝' },
+        { value: 'fee',         label: 'Fees',         icon: '💰' },
+        { value: 'result',      label: 'Results',      icon: '🏆' },
+        { value: 'achievement', label: 'Achievements', icon: '🥇' }
+      ]; track filter.value) {
+        <button
+          class="type-pill"
+          [class.pill-active]="activeFilter() === filter.value"
+          (click)="setFilter(filter.value === 'all' ? 'all' :
+                             filter.value === 'class' ? 'class' :
+                             filter.value === 'assignment' ? 'assignment' :
+                             filter.value === 'fee' ? 'fee' :
+                             filter.value === 'result' ? 'result' : 'achievement')">
+          {{ filter.icon }} {{ filter.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- ══ NOTIFICATIONS LIST ═════════════════════════════════════════════ -->
+  @if (filteredNotifications().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">🔔</div>
+      <h3>No notifications here</h3>
+      <p>
+        @if (activeView() === 'unread') {
+          You have read all your notifications. 
+        } @else {
+          No notifications match this filter.
+        }
+      </p>
+      <button class="btn-reset" (click)="setView('all'); setFilter('all')">
+        Show All Notifications
+      </button>
+    </div>
+  }
+
+  <!-- Grouped Notifications -->
+  @for (group of groupedNotifications(); track group.label) {
+    <div class="notif-group">
+
+      <!-- Group Label -->
+      <div class="group-label">
+        <span class="group-line"></span>
+        <span class="group-text">{{ group.label }}</span>
+        <span class="group-line"></span>
+      </div>
+
+      <!-- Notification Items -->
+      @for (notif of group.notifications; track notif.id) {
+        <div
+          class="notif-item"
+          [class.notif-unread]="!notif.read"
+          (click)="markAsRead(notif.id)">
+
+          <!-- Left — Icon / Avatar -->
+          <div class="notif-icon-wrap">
+            <div class="notif-icon {{ typeColor(notif.type) }}">
+              {{ notif.icon }}
+            </div>
+            @if (notif.avatar) {
+              <div class="notif-avatar">{{ notif.avatar }}</div>
+            }
+          </div>
+
+          <!-- Center — Content -->
+          <div class="notif-content">
+            <div class="notif-top-row">
+              <span class="notif-title"
+                [class.title-unread]="!notif.read">
+                {{ notif.title }}
+              </span>
+              <span class="type-chip {{ typeColor(notif.type) }}">
+                {{ typeLabel(notif.type) }}
+              </span>
+            </div>
+            <p class="notif-message">{{ notif.message }}</p>
+            <div class="notif-bottom-row">
+              <span class="notif-time">🕐 {{ notif.timeAgo }}</span>
+              @if (notif.actionUrl && notif.actionLabel) {
+                <a
+                  [routerLink]="notif.actionUrl"
+                  class="notif-action-link"
+                  (click)="$event.stopPropagation()">
+                  {{ notif.actionLabel }} →
+                </a>
+              }
+            </div>
+          </div>
+
+          <!-- Right — Actions -->
+          <div class="notif-actions">
+            @if (!notif.read) {
+              <div class="unread-dot" title="Mark as read"></div>
+            }
+            <button
+              class="action-btn delete-btn"
+              title="Delete notification"
+              (click)="$event.stopPropagation(); deleteNotification(notif.id)">
+              🗑️
+            </button>
+          </div>
+
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ══ BELL WIDGET (bottom right — shows dropdown) ════════════════════ -->
+  <div class="notif-bell-wrapper">
+    <button class="bell-btn" (click)="toggleDropdown()">
+      🔔
+      @if (unreadCount() > 0) {
+        <span class="bell-badge">
+          {{ unreadCount() > 9 ? '9+' : unreadCount() }}
+        </span>
+      }
+    </button>
+
+    <!-- Dropdown -->
+    @if (dropdownOpen()) {
+      <div class="notif-dropdown">
+
+        <!-- Dropdown Header -->
+        <div class="dropdown-header">
+          <span class="dropdown-title">
+            Notifications
+            @if (unreadCount() > 0) {
+              <span class="dd-badge">{{ unreadCount() }}</span>
+            }
+          </span>
+          @if (unreadCount() > 0) {
+            <button class="dd-mark-all" (click)="markAllRead()">
+              Mark all read
+            </button>
+          }
+        </div>
+
+        <!-- Dropdown List -->
+        <div class="dropdown-list">
+          @for (notif of recentNotifications(); track notif.id) {
+            <div
+              class="dd-item"
+              [class.dd-unread]="!notif.read"
+              (click)="onNotifClick(notif)">
+
+              <div class="dd-icon {{ typeColor(notif.type) }}">
+                {{ notif.icon }}
+              </div>
+
+              <div class="dd-content">
+                <div class="dd-title"
+                  [class.dd-title-unread]="!notif.read">
+                  {{ notif.title }}
+                </div>
+                <div class="dd-message">{{ notif.message }}</div>
+                <div class="dd-time">{{ notif.timeAgo }}</div>
+              </div>
+
+              @if (!notif.read) {
+                <span class="dd-dot"></span>
+              }
+
+            </div>
+          }
+        </div>
+
+        <!-- Dropdown Footer -->
+        <div class="dropdown-footer">
+          <a routerLink="/notifications" class="dd-view-all"
+            (click)="closeDropdown()">
+            View all notifications →
+          </a>
+        </div>
+
+      </div>
+    }
+  </div>
+
+</div>

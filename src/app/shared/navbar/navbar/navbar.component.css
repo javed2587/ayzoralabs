@@ -183,3 +183,26 @@
   .nav-auth { display: none; }
   .hamburger { display: flex; }
 }
+/* In navbar.component.css */
+.bell-nav-btn {
+  position: relative;
+  font-size: 20px;
+  text-decoration: none;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.bell-nav-btn:hover { background: #f0effe; }
+
+.bell-nav-badge {
+  position: absolute;
+  top: 0; right: 0;
+  background: #ef4444;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}

@@ -1,6 +1,5 @@
 import { Component, HostListener, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-
 interface NavLink {
   label: string;
   path: string;
