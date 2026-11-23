@@ -90,9 +90,9 @@
           <!-- Price & Enroll -->
           <div class="enroll-box">
             <div class="price-row">
-              <span class="price-main">{{ formatPrice(course()!.price) }}</span>
-              <span class="price-original">{{ formatPrice(course()!.originalPrice) }}</span>
-              <span class="discount-badge">{{ discount() }}% OFF</span>
+              <!-- <span class="price-main">{{ formatPrice(course()!.price) }}</span>
+              <span class="price-original">{{ formatPrice(course()!.originalPrice) }}</span> 
+              <span class="discount-badge">{{ discount() }}% OFF</span> -->
             </div>
 
             @if (enrollSuccess()) {
@@ -101,7 +101,8 @@
               </div>
             } @else {
               <button class="btn-enroll" (click)="onEnroll()">
-                Enroll Now — {{ formatPrice(course()!.price) }}
+                Enroll Now
+                 <!-- — {{ formatPrice(course()!.price) }} -->
               </button>
             }
 
@@ -303,11 +304,11 @@
       <!-- ── STICKY SIDEBAR (mobile enroll CTA) ── -->
       <aside class="tab-sidebar">
         <div class="sidebar-card">
-          <div class="price-row">
+          <!-- <div class="price-row">
             <span class="price-main">{{ formatPrice(course()!.price) }}</span>
             <span class="price-original">{{ formatPrice(course()!.originalPrice) }}</span>
             <span class="discount-badge">{{ discount() }}% OFF</span>
-          </div>
+          </div> -->
 
           @if (enrollSuccess()) {
             <div class="enroll-success">✅ Redirecting...</div>

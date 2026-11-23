@@ -1,6 +1,6 @@
 import { Component, signal, computed, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+// import { RouterLink } from '@angular/router';
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
 
@@ -41,7 +41,7 @@ type FilterType       = 'all' | 'pending' | 'submitted' | 'graded' | 'overdue';
 @Component({
   selector:    'app-assignments',
   standalone:  true,
-  imports:     [ReactiveFormsModule, RouterLink],
+  imports:     [ReactiveFormsModule],
   templateUrl: './assignments.component.html',
   styleUrl:    './assignments.component.css'
 })
